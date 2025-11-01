@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Spanish Sound Bites - Director</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --gap: 4px;
+      --slot-pad: 4px;
+      --slot-radius: 14px;
+      --slot-border: 1px solid #ccc;
+      --slot-hover: turquoise;
+      --focus: 2px solid #1976d2;
+    }
+
+    * { box-sizing: border-box; }
+
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background:#f0f8ff;
+      color:#111;
+      line-height:1.35;
+    }
+
+    /* ---- Lesson selection (now 2 columns) ---- */
+    #lesson-select{
+      padding: 20px 16px 28px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    #lesson-select h2{
+      margin: 8px 0 10px;
+      font-size: clamp(1.1rem, 2.6vw, 1.6rem);
+    }
+    #lesson-buttons{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--gap);
+      align-items: stretch;
+    }
+    .nav-button{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 12px;
+      border: var(--slot-border);
+      border-radius: var(--slot-radius);
+      background: white;
+      cursor:pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      text-align:center;
+      transition: background .15s ease;
+    }
+    .nav-button:hover{ background: var(--slot-hover); }
+    .nav-button:focus{ outline: var(--focus); }
+
+    /* ---- Structure view ---- */
+    #structure{
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      display: none;
+      background-color: #f0f8ff;
+      overflow: hidden;
+    }
+
+    .box{
+      position: absolute;
+      border-radius:16vh;
+      background-color: rgba(200, 200, 200, 0.2);
+      text-align: center;
+      font-weight: bold;
+      color: black;
+    }
+    .box img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+    }
+
+    /* ---- Bottom bar ---- */
+    .zipbutton{
+      display: none;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 2vh;
+      position: fixed;
+      bottom: 2vh;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #f0f0f0;
+      padding: 6px 10px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+    }
+    .buttonz{
+      border: 2px solid #4CAF50;
+      border-radius: 1vw;
+      height: 5vh;
+      width: 5vw;
+      min-width: 56px;
+      min-height: 36px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size: 14px;
+      background-color: #d05000;
+    }
+    .buttonz img{ max-width:100%; max-height:100%; }
+
+    /* ---- Lesson chip ---- */
+    #lesson-chip{
+      position: fixed;
+      bottom: 4vh;
+      right: 8vw;
+      background: #ffffff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-weight: 700;
+      display: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,.08);
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ✅ LESSON SELECTION -->
+  <div id="lesson-select">
+    <h2>Selecciona una lección:</h2>
+    <div id="lesson-buttons"></div>
+  </div>
+
+  <!-- ✅ STRUCTURE CANVAS -->
+  <div id="structure"></div>
+
+  <!-- ✅ BOTTOM BAR -->
+  <div id="pbar" class="zipbutton">
+    <!-- #1 Continue (advance lesson) -->
+    <div class="buttonz" data-btn="continue" title="Continuar (siguiente lección)">
+      <img src="./trigger/adelante.png" alt="Adelante">
+    </div>
+    <!-- #2 exit program -->
+    <div class="buttonz" data-btn="exit" title="Salir del programa">
+      <img src="./trigger/exit.png" alt="exit">
+    </div>
+    <!-- #3 Go to Selection area -->
+    <div class="buttonz" data-btn="choosel" title="Ir a selección de lecciones">
+      <img src="./trigger/choosel.png" alt="choosel">
+    </div>
+
+    <!-- Remaining buttons -->
+    <div class="buttonz" data-btn="help" title="Ayuda"><img src="./trigger/help.png" alt="Help"></div>
+    <div class="buttonz" data-btn="donate" title="Donar"><img src="./trigger/donate.png" alt="Donate"></div>
+    <div class="buttonz" data-btn="email" title="Correo (Gmail compose)"><img src="./trigger/kill.png" alt=""></div> 
+    <div class="buttonz" data-btn="goback" title="Volver"><img src="./trigger/goback.png" alt="Back"></div> 
+    <div class="buttonz" data-btn="translate" title="Traducir"><img src="./trigger/translate.png" alt="Translate"></div>
+  </div>
+
+  <!-- ✅ LESSON CHIP -->
+  <div id="lesson-chip" aria-live="polite" aria-atomic="true">Lesson 1</div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const lessonSelect    = document.getElementById('lesson-select');
+      const structureArea   = document.getElementById('structure');
+      const lessonButtonsEl = document.getElementById('lesson-buttons');
+      const pbar            = document.getElementById('pbar');
+      const lessonChip      = document.getElementById('lesson-chip');
+      const exit_url= 'index.html';
+
+      let selectedLesson   = 1;
+      let selectedPersonId = null;
+      let highlightedBox   = null;
+
+      function showLessonChip(show){ lessonChip.style.display = show ? 'block' : 'none'; }
+      function updateLessonChip(){ lessonChip.textContent = `Lección ${selectedLesson}`; }
+      function nudgeChip(){
+        try {
+          lessonChip.animate([{transform:'scale(1)'},{transform:'scale(1.06)'},{transform:'scale(1)'}],
+                             {duration:320,easing:'ease-out'});
+        }catch(e){}
+      }
+
+      /* --- AudioBus (no overlap) --- */
+      const audioBus = (() => {
+        let current = [];
+        function stopAll(){ current.forEach(a=>{try{a.pause();a.currentTime=0;}catch(e){}}); current=[]; }
+        function make(src){ const a=new Audio(src); a.addEventListener('ended',()=>{current=current.filter(x=>x!==a);}); current.push(a); return a; }
+        function playOne(src){ stopAll(); const a=make(src); a.play().catch(()=>{}); }
+        // 🔧 Tightened chaining to remove the audible gap between phrase and snap-on
+        function playChain(a1,a2){
+          stopAll();
+          const a = make(a1);
+          let started = false;
+
+          // Start the second sound slightly before the first ends (120ms)
+          a.addEventListener('timeupdate', () => {
+            if (!started && a.duration && a.currentTime > a.duration - 0.00) {
+              started = true;
+              const b = make(a2);
+              b.play().catch(()=>{});
+            }
+          });
+
+          // Fallback: if for any reason timeupdate doesn't fire late enough
+          a.addEventListener('ended', () => {
+            if (!started) {
+              const b = make(a2);
+              b.play().catch(()=>{});
+            }
+          });
+
+          // If first file can't play, start the second immediately
+          a.play().catch(()=>{ const b = make(a2); b.play().catch(()=>{}); });
+        }
+        return {playOne,playChain,stopAll};
+      })();
+
+      const VERBS=[null,'Tener','Querer','Decir','Estar','Necesitar','Ir','Saber','Venir','Comer','Tomar','Hablar','Ver','Ser','Poder','Vivir','Haber','Dar','Poner','Hacer','Quedar'];
+
+      for(let i=1;i<=20;i++){
+        const btn=document.createElement('button');
+        btn.textContent=`Lección ${i} — ${VERBS[i]}`;
+        btn.className='nav-button';
+        btn.addEventListener('click',()=>{
+          selectedLesson=i;
+          lessonSelect.style.display='none';
+          structureArea.style.display='block';
+          pbar.style.display='flex';
+          audioBus.stopAll();
+          loadStructure();
+          updateLessonChip();
+          showLessonChip(true);
+        });
+        lessonButtonsEl.appendChild(btn);
+      }
+
+      const SMALL={w:'clamp(60px,6.5vw,100px)',h:'clamp(60px,6.5vw,100px)'};
+      const MED={w:'clamp(90px,9.5vw,200px)',h:'clamp(90px,9.5vw,200px)'};
+      const BIG={w:'clamp(100px,12vw,200px)',h:'clamp(100px,12vw,200px)'};
+
+      const boxData=[
+        {id:1,top:'1vh',left:'1vw',width:SMALL.w,height:SMALL.h},
+        {id:2,top:'21vh',left:'1vw',width:SMALL.w,height:SMALL.h},
+        {id:3,top:'41vh',left:'1vw',width:SMALL.w,height:SMALL.h},
+        {id:4,top:'61vh',left:'1vw',width:SMALL.w,height:SMALL.h},
+        {id:5,top:'81vh',left:'1vw',width:SMALL.w,height:SMALL.h},
+        {id:6,top:'1vh',left:'92vw',width:SMALL.w,height:SMALL.h},
+        {id:7,top:'21vh',left:'92vw',width:SMALL.w,height:SMALL.h},
+        {id:8,top:'41vh',left:'92vw',width:SMALL.w,height:SMALL.h},
+        {id:9,top:'61vh',left:'92vw',width:SMALL.w,height:SMALL.h},
+        {id:10,top:'81vh',left:'92vw',width:SMALL.w,height:SMALL.h},
+        {id:11,top:'64.5vh',left:'17vw',width:BIG.w,height:BIG.h},
+        {id:12,top:'64.5vh',left:'33vw',width:BIG.w,height:BIG.h},
+        {id:13,top:'64.5vh',left:'49vw',width:BIG.w,height:BIG.h},
+        {id:14,top:'64.5vh',left:'65vw',width:BIG.w,height:BIG.h},
+        {id:15,top:'33vh',left:'17vw',width:BIG.w,height:BIG.h},
+        {id:16,top:'33vh',left:'33vw',width:BIG.w,height:BIG.h},
+        {id:17,top:'33vh',left:'49vw',width:BIG.w,height:BIG.h},
+        {id:18,top:'1vh',left:'17vw',width:BIG.w,height:BIG.h},
+        {id:19,top:'1vh',left:'33vw',width:BIG.w,height:BIG.h},
+        {id:20,top:'1vh',left:'49vw',width:BIG.w,height:BIG.h},
+        {id:21,top:'1vh',left:'65vw',width:BIG.w,height:BIG.h},
+        {id:22,top:'33vh',left:'65vw',width:BIG.w,height:BIG.h}
+      ];
+
+      function loadStructure(){
+        structureArea.innerHTML='';
+        selectedPersonId=null;
+        if(highlightedBox) highlightedBox.style.outline='';
+        highlightedBox=null;
+
+        boxData.forEach(box=>{
+          const div=document.createElement('div');
+          div.className='box';
+          div.id=`box${box.id}`;
+          div.style.top=box.top;
+          div.style.left=box.left;
+          div.style.width=box.width;
+          div.style.height=box.height;
+
+          const img=document.createElement('img');
+          img.src=`./group/lesson${selectedLesson}/image/p${box.id}.png`;
+          img.alt=`./group/lesson${selectedLesson}/image/p${box.id}.png`;
+          div.appendChild(img);
+          structureArea.appendChild(div);
+
+          div.addEventListener('click',()=>{
+            if(box.id===21||box.id===22){
+              selectedPersonId=null;
+              if(highlightedBox) highlightedBox.style.outline='';
+              highlightedBox=null;
+              audioBus.playOne(`./group/lesson${selectedLesson}/sound/${box.id}.m4a`);
+              return;
+            }
+            if(box.id>=11&&box.id<=20){
+              selectedPersonId=box.id;
+              if(highlightedBox) highlightedBox.style.outline='';
+              div.style.outline='5px solid red';
+              highlightedBox=div;
+              audioBus.playOne(`./group/lesson${selectedLesson}/sound/${box.id}.m4a`);
+              return;
+            }
+            if(box.id>=1&&box.id<=10){
+              if(selectedPersonId){
+                audioBus.playChain(`./group/lesson${selectedLesson}/sound/${selectedPersonId}.m4a`,
+                                   `./group/lesson${selectedLesson}/sound/${box.id}.m4a`);
+              }else{
+                audioBus.playOne(`./group/lesson${selectedLesson}/sound/${box.id}.m4a`);
+              }
+              selectedPersonId=null;
+              if(highlightedBox) highlightedBox.style.outline='';
+              highlightedBox=null;
+            }
+          });
+        });
+      }
+
+      function showSelection(){
+        audioBus.stopAll();
+        structureArea.style.display='none';
+        lessonSelect.style.display='block';
+        pbar.style.display='none';
+        showLessonChip(false);
+      }
+
+      function exitProgram(){
+        audioBus.stopAll();
+        try{window.close();}catch(e){};
+        try{location.href=exit_url;}catch(e){};
+        setTimeout(()=>{try{location.replace('about:blank');}catch(e){}},200);
+      }
+
+      // --- Button bar actions (by image filename, matching your existing pattern)
+      document.addEventListener('click',ev=>{
+        const img=ev.target.closest && ev.target.closest('.buttonz img');
+        if(!img) return;
+        const src=(img.getAttribute('src')||'').toLowerCase();
+
+        if(src.includes('adelante')){
+          if(structureArea.style.display==='block'){
+            if(selectedLesson<20){
+              selectedLesson++;
+              audioBus.stopAll();
+              loadStructure();
+              updateLessonChip();
+              nudgeChip();
+            } else {
+              nudgeChip();
+            }
+          }
+          return;
+        }
+
+        if(src.includes('exit')){ exitProgram(); return; }
+        if(src.includes('choosel')){ showSelection(); return; }
+
+        // ✅ Button #7 (goback icon) → Open lagente.html in a NEW TAB, preserve current state
+        if(src.includes('goback')){
+          try {
+            window.open('./lagente.html', '_blank', 'noopener,noreferrer');
+          } catch(e) {
+            // Fallback: if popup blocked, navigate in this tab
+            location.href = './lagente.html';
+          }
+          return;
+        }
+
+        // ✅ Email button → Always open in a NEW TAB so closing it returns to SSB
+        if(src.includes('email')){
+          const gmailCompose = "https://mail.google.com/mail/?view=cm&fs=1&to=spanishsoundbites@gmail.com&su=SSB%20Feedback";
+          let win = null;
+          try {
+            win = window.open(gmailCompose, '_blank', 'noopener,noreferrer');
+          } catch(e) { win = null; }
+
+          if(!win){
+            // Fallback: open mailto in a NEW TAB (never navigate this tab)
+            const a = document.createElement('a');
+            a.href = "mailto:spanishsoundbites@gmail.com?subject=SSB%20Feedback";
+            a.target = "_blank";
+            a.rel = "noopener";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+          }
+          return;
+        }
+
+
+        // ✅ Translate button → play per-lesson translation audio (m4a with wav fallback)
+        if(src.includes('translate')){
+          const m4a = `./group/translation/lesson${selectedLesson}.m4a`;
+          const wav = `./group/translation/lesson${selectedLesson}.wav`;
+          audioBus.stopAll();
+          const a = new Audio(m4a);
+          a.play().catch(() => {
+            const b = new Audio(m4a);
+            b.play().catch(()=>{ /* no-op if missing */ });
+          });
+          return;
+        }
+      },false);
+
+      window.addEventListener('pagehide',()=>audioBus.stopAll());
+      window.addEventListener('beforeunload',()=>audioBus.stopAll());
+    });
+  </script>
+</body>
+</html>

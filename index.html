@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <!-- Correct placement of the meta tag -->
+  <title>Welcome to Your Spanish Journey</title>
+
+  <style>
+    /* Body styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #57ecf6;
+      color: #333;
+    }
+
+    /* Header styles */
+    header {
+      text-align: center;
+      padding-top: 1rem;
+    }
+
+    /* Main center container */
+    #container {
+      position: absolute;
+      left: 42vw;
+      top: 70px;
+      background-color: tan;
+      border-radius: 10px;
+      max-width: 220px;
+      padding: 1rem;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .section {
+      margin: 1rem 0;
+      padding: 0.5rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    button {
+      background-color: #007acc;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #005fa3;
+    }
+
+    /* Left side credits container */
+    #credits {
+      position: absolute;
+      top: 100px;
+      left: 40px;
+      background-color: #fffbea;
+      color: #333;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+      padding: 1rem;
+      width: 250px;
+    }
+
+    #credits h3 {
+      margin-top: 0;
+      color: #444;
+      text-align: center;
+    }
+
+    #credits ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    #credits li {
+      padding-left: 0.5rem;
+    }
+
+    /* Right side notice container */
+    #notice {
+      position: absolute;
+      top: 100px;
+      right: 40px;
+      background-color: #ffd5c2;
+      color: #222;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+      padding: 1rem;
+      width: 250px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    #notice h3 {
+      text-align: center;
+      margin-top: 0;
+      color: #333;
+    }
+
+    /* Footer note */
+    .note {
+      position: absolute;
+      bottom: 30px;
+      width: 100%;
+      text-align: center;
+      font-style: italic;
+      color: #555;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h2>Bienvenidos a Spanish Platica</h2>
+  </header>
+
+  <!-- LEFT SIDE CREDITS CONTAINER -->
+  <div id="credits">
+    <h3>Credits</h3>
+    <ul>
+      <li><strong>Project Creator:</strong> Jimmy Self</li>
+      <li><strong>Project Assistant:</strong> AJ Cornell</li>
+      <li><strong>Art & Design:</strong> José García</li>
+      <li><strong>Visuals:</strong> María Flores</li>
+      <li><strong>Audio Mixing:</strong> Pedro Castro</li>
+      <li><strong>Production Advisor:</strong> Prof. Eduardo De León</li>
+    </ul>
+  </div>
+
+  <!-- RIGHT SIDE NOTICE CONTAINER -->
+  <div id="notice">
+    <h3>Under Construction</h3>
+    <p>This site is under construction. Expect errors.</p>
+  </div>
+
+  <!-- MAIN CENTER OPTIONS -->
+  <div id="container">
+    <div class="section">
+      <h2>Returning Student?</h2>
+      <button onclick="location.href='./director.html'">Start</button>
+    </div>
+
+    <div class="section">
+      <h2>First Time Here?</h2>
+      <button onclick="location.href='./welcome.html'">Start from the Beginning</button>
+    </div>
+
+    <div class="section">
+      <h2>Come Back Soon</h2>
+      <button onclick="location.href='./index.html'">Exit</button>
+    </div>
+  </div>
+
+</body>
+
+</html>
