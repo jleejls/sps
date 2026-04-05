@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Structure</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body{
+    margin:0;
+    background:#000;
+  }
+</style>
+</head>
+<body>
+<script>
+(function(){
+
+  // -------------------------------------------------
+  // INDIVIDUAL TILE SIZE
+  // -------------------------------------------------
+  const TILE_W = 140;
+  const TILE_H = 90;
+  const TILE_W1 = 190;
+  const TILE_H1 = 250;
+
+  // -------------------------------------------------
+  // INDIVIDUAL SLOT POSITIONS
+  // Move ANY ONE of these by changing only its x or y.
+  // Nothing else should move with it.
+  // -------------------------------------------------
+
+  const pronounLayout = [
+//{ id: 0, kind: "slot position              slot size)
+  { id: 1, kind: "pronoun", x: 190, y:  1.1, width: TILE_W1, height: TILE_H1 },
+  { id: 2, kind: "pronoun", x: 390, y:  1.1, width: TILE_W1, height: TILE_H1 },
+  { id: 3, kind: "pronoun", x: 600, y:  1.1, width: TILE_W1, height: TILE_H1 },
+  { id: 4, kind: "pronoun", x: 805, y:  1.1, width: TILE_W1, height: TILE_H1 },
+
+  { id: 5, kind: "pronoun", x: 140, y: 274.2, width: TILE_W1, height: TILE_H1 },
+  { id: 6, kind: "pronoun", x: 325, y: 274.2, width: TILE_W1, height: TILE_H1 },
+  { id: 7, kind: "pronoun", x: 507, y: 274.2, width: TILE_W1, height: TILE_H1 },
+  { id: 8, kind: "pronoun", x: 692, y: 274.2, width: TILE_W1, height: TILE_H1 },
+  { id: 9, kind: "pronoun", x: 877, y: 274.2, width: TILE_W1, height: TILE_H1 },
+  { id: 10, kind: "pronoun", x: 1010.1, y: 1.1, width: TILE_W1, height: TILE_H1 },
+  { id: 11, kind: "pronoun", x: 1057, y: 274.2, width: TILE_W1, height: TILE_H1 },
+];
+    // If later you activate expression tiles, use the same idea:
+    //{ id: 8, kind: "pronoun", x: 284, y: 228, width: TILE_W, height: TILE_H }
+    // ,{ id: 9, kind: "expression", x: 418, y: 228, width: TILE_W, height: TILE_H }
+  
+
+  const objectLayout = [
+    // Left side column
+    { id: 1,  column: 1, x: 2, y: 20, width: TILE_W, height: TILE_H },
+    { id: 2,  column: 1, x: 2, y: 124, width: TILE_W, height: TILE_H },
+    { id: 3,  column: 1, x: 2, y: 228, width: TILE_W, height: TILE_H },
+    { id: 4,  column: 1, x: 2, y: 332, width: TILE_W, height: TILE_H },
+    { id: 5,  column: 1, x: 2, y: 436, width: TILE_W, height: TILE_H },
+
+    // Right side column
+    { id: 6,  column: 2, x: 1220, y:  20, width: TILE_W, height: TILE_H },
+    { id: 7,  column: 2, x: 1220, y: 124, width: TILE_W, height: TILE_H },
+    { id: 8,  column: 2, x: 1220, y: 228, width: TILE_W, height: TILE_H },
+    { id: 9,  column: 2, x: 1220, y: 332, width: TILE_W, height: TILE_H },
+    { id: 10, column: 2, x: 1220, y: 436, width: TILE_W, height: TILE_H }
+  ];
+
+  // -------------------------------------------------
+  // STORE FOR DIRECTOR
+  // -------------------------------------------------
+  sessionStorage.setItem("pronounSlots", JSON.stringify(pronounLayout));
+  sessionStorage.setItem("objectSlots", JSON.stringify(objectLayout));
+
+  // -------------------------------------------------
+  // CONTINUE PROGRAM FLOW
+  // -------------------------------------------------
+  location.href = "lesson_select.html";
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to Your English Journey</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #57ecf6;
+      color: #333;
+    }
+
+    header {
+      text-align: center;
+      padding-top: 0rem;
+    }
+
+    /* Main center container */
+    #container {
+      position: absolute;
+      left: 42vw;
+      top: 70px;
+      background-color: tan;
+      border-radius: 10px;
+      max-width: 220px;
+      padding: 1rem;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .section {
+      margin: 1rem 0;
+      padding: 1.0rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    button {
+      background-color: #007acc;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #005fa3;
+    }
+
+    /* Left side credits container */
+    #credits {
+      position: absolute;
+      top: 100px;
+      left: 40px;
+      background-color: #fffbea;
+      color: #333;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+      padding: 1rem;
+      width: 250px;
+    }
+
+    #credits h3 {
+      margin-top: 0;
+      color: #444;
+      text-align: center;
+    }
+
+    #credits ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    #credits li {
+      padding-left: 0.5rem;
+    }
+
+    /* Right side notice container */
+    #notice {
+      position: absolute;
+      top: 100px;
+      right: 40px;
+      background-color: #ffd5c2;
+      color: #222;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+      padding: 1rem;
+      width: 250px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    #notice h3 {
+      text-align: center;
+      margin-top: 0;
+      color: #333;
+    }
+
+    /* Footer note */
+    .note {
+      position: absolute;
+      bottom: 30px;
+      width: 100%;
+      text-align: center;
+      font-style: italic;
+      color: #555;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h2>Bienvenidos a Spanish Platica</h2>
+  </header>
+
+  <!-- LEFT SIDE CREDITS CONTAINER -->
+  <div id="credits">
+    <h3>Creditos</h3>
+    <ul>
+      <li><strong>Creador del proyecto:</strong> Jimmy Self</li>
+      <li><strong>Ayudante:</strong>AJ Cornell</li>
+      <li><strong>Diseño y Arte:</strong> José García</li>
+      <li><strong>Visuales:</strong> María Flores</li>
+      <li><strong>Audio :</strong> Jimmy Self</li>
+      <li><strong>Asesoro de production:</strong> Prof. Eduardo De León</li>
+    </ul>
+  </div>
+
+  <!-- RIGHT SIDE NOTICE CONTAINER -->
+  <div id="notice">
+    <h3>Bajo Construccion</h3>
+    <p>Este sitio esta debajo construccion. Puede esperar errores y correcciones. </p>
+
+  </div>
+
+  <!-- MAIN CENTER OPTIONS -->
+  <div id="container">
+    <div class="section">
+      <h2>Vuelve a estudiar</h2>
+      <button onclick="location.href='./structure.html'">Comience</button>
+    </div>
+
+    <div class="section">
+      <h2>Primera vez aqui</h2>
+      <button onclick="location.href='./welcome.html'">Desde el principio</button>
+    </div>
+
+    <div class="section">
+      <h2>Vuelva pronto</h2>
+      <button onclick="window.location.href='./about:blank'">Salir</button>
+    </div>
+  </div>
+
+</body>
+</html>

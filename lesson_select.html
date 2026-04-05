@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lesson Select</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  body{
+    margin:0;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    background:#f5f7fb;
+    color:#222;
+  }
+
+  header{
+    padding:16px 20px;
+    background:#1e293b;
+    color:#fff;
+    font-weight:600;
+    font-size:22px;
+  }
+
+  main{
+    max-width:1200px;
+    margin:0 auto;
+    padding:16px;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(4, minmax(0,1fr));
+    gap:12px;
+  }
+
+  button.lesson-btn{
+    width:100%;
+    text-align:left;
+    padding:14px 16px;
+    border:1px solid #d7dbe3;
+    border-radius:12px;
+    background:#fff;
+    cursor:pointer;
+    font-size:18px;
+    line-height:1.35;
+  }
+
+  button.lesson-btn:hover{
+    box-shadow:0 2px 12px rgba(0,0,0,.06);
+  }
+
+  .lesson-title{
+    font-weight:700;
+    display:block;
+  }
+
+  .verb-name{
+    display:block;
+    font-size:15px;
+    color:#475569;
+    margin-top:4px;
+  }
+
+  @media (max-width:900px){
+    .grid{
+      grid-template-columns:repeat(2, minmax(0,1fr));
+    }
+  }
+
+  @media (max-width:500px){
+    .grid{
+      grid-template-columns:1fr;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>Pick a lesson</header>
+
+<main>
+  <div id="pick" class="grid" aria-live="polite"></div>
+</main>
+
+<script>
+const lessons = [
+  { num: 1, verb: "comer" },
+  { num: 2, verb: "hablar" },
+  { num: 3, verb: "vivir" },
+  { num: 4, verb: "dar" },
+  { num: 5, verb: "decir" },
+  { num: 6, verb: "ir" },
+  { num: 7, verb: "venir" },
+  { num: 8, verb: "tomar" },
+  { num: 9, verb: "ver" },
+  { num: 10, verb: "poner" },
+  { num: 11, verb: "estar" },
+  { num: 12, verb: "tener" },
+  { num: 13, verb: "querer" },
+  { num: 14, verb: "hacer" },
+  { num: 15, verb: "poder" },
+  { num: 16, verb: "necesitar" },
+  { num: 17, verb: "ser" },
+  { num: 18, verb: "saber" },
+  { num: 19, verb: "quedar" },
+  { num: 20, verb: "haber" }
+];
+
+const pick = document.getElementById("pick");
+
+lessons.forEach(item => {
+  const b = document.createElement("button");
+  b.className = "lesson-btn";
+  b.type = "button";
+  b.innerHTML = `
+    <span class="lesson-title">Lesson ${item.num}</span>
+    <span class="verb-name">${item.verb}</span>
+  `;
+  b.onclick = function () {
+    startLesson(item.num);
+  };
+  pick.appendChild(b);
+});
+
+function startLesson(num) {
+  sessionStorage.setItem("lesson", num);
+  sessionStorage.setItem("tense", "now");
+  window.location.href = "director.html";
+}
+</script>
+
+</body>
+</html>

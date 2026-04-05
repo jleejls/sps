@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>director</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root{
+    --trigger-size: 54px;
+    --trigger-gap: 8px;
+    --trigger-pad-y: 8px;
+    --trigger-pad-x: 10px;
+    --trigger-bar-height: calc(var(--trigger-size) + (var(--trigger-pad-y) * 2));
+  }
+  *{ box-sizing:border-box; }
+  html, body{
+    margin:0;
+    width:100%;
+    height:100%;
+    background:#ffffff;
+    overflow:auto;
+    font-family:Arial, Helvetica, sans-serif;
+  }
+  body{
+    position:relative;
+  }
+  #stage{
+    position:relative;
+    min-height:100vh;
+    padding-bottom:calc(var(--trigger-bar-height) + 18px);
+    background:#ffffff;
+  }
+.slot-tile{
+    position:absolute;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    border:none;
+    border-radius:0;
+    background:transparent;
+    cursor:pointer;
+    user-select:none;
+}
+
+.slot-tile img{
+    width:100%;
+    height:100%;
+    object-fit:contain !important;
+    object-position:center center;
+    display:block;
+}
+
+  border:none;              /* remove border */
+  border-radius:0;          /* remove rounded corners */
+  background:transparent;   /* make fully transparent */
+
+  cursor:pointer;
+  user-select:none;
+}
+  .slot-tile img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:block;
+  }
+  .slot-tile.pronoun.active{
+    outline:3px solid #7aa7ff;
+    outline-offset:2px;
+  }
+  .error-box{
+    position:absolute;
+    width:120px;
+    min-height:80px;
+    padding:8px;
+    border:2px solid #a30000;
+    background:#fff1f1;
+    color:#7a0000;
+    font:12px/1.25 monospace;
+    border-radius:8px;
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+    z-index:50;
+  }
+  .trigger-bar{
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+    min-height:var(--trigger-bar-height);
+    padding:var(--trigger-pad-y) var(--trigger-pad-x);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:var(--trigger-gap);
+    background:rgba(255,255,255,.97);
+    box-shadow:0 -2px 10px rgba(0,0,0,.10);
+    z-index:1000;
+  }
+  .trigger-btn{
+    width:var(--trigger-size);
+    height:var(--trigger-size);
+    padding:0;
+    border:1px solid #cfd6df;
+    border-radius:10px;
+    background:#f8f9fb;
+    cursor:pointer;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .trigger-btn img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:block;
+  }
+  .trigger-btn.placeholder{
+    font:11px/1.1 Arial, Helvetica, sans-serif;
+    text-align:center;
+    padding:4px;
+  }
+  #lessonBadge{
+    min-width:70px;
+    height:var(--trigger-size);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0 10px;
+    border:1px solid #cfd6df;
+    border-radius:10px;
+    background:#fff9d6;
+    font:14px/1 Arial, Helvetica, sans-serif;
+    color:#333;
+    white-space:nowrap;
+  }
+  #fatalError{
+    position:fixed;
+    top:12px;
+    left:12px;
+    max-width:min(420px, calc(100vw - 24px));
+    padding:10px 12px;
+    border:2px solid #a30000;
+    border-radius:10px;
+    background:#fff1f1;
+    color:#7a0000;
+    font:13px/1.35 monospace;
+    z-index:2000;
+    display:none;
+    white-space:pre-wrap;
+  }
+</style>
+</head>
+<body>
+<div id="fatalError"></div>
+<div id="stage"></div>
+<div id="triggerBar" class="trigger-bar"></div>
+<audio id="player" preload="auto"></audio>
+<script>
+(function(){
+  "use strict";
+  const stage = document.getElementById("stage");
+  const triggerBar = document.getElementById("triggerBar");
+  const lessonBadge = document.createElement("div");
+  lessonBadge.id = "lessonBadge";
+  const player = document.getElementById("player");
+  const fatalError = document.getElementById("fatalError");
+  const PRONOUN_SLOT_KEY = "pronounSlots";
+  const OBJECT_SLOT_KEY = "objectSlots";
+  const LESSON_KEY = "lesson";
+  const pronounNameMap = {
+    1: "pronoun 1",
+    2: "pronoun 2",
+    3: "pronoun 3",
+    4: "pronoun 4",
+    5: "pronoun 5",
+    6: "pronoun 6",
+    7: "pronoun 7",
+    8: "pronoun 8",
+    9: "pronoun 9",
+    10: "pronoun 10"
+    //11."pronoun 11",
+  };
+  const objectNameMap = {
+    1: "object 1",
+    2: "object 2",
+    3: "object 3",
+    4: "object 4",
+    5: "object 5",
+    6: "object 6",
+    7: "object 7",
+    8: "object 8",
+    9: "object 9",
+    10: "object 10"
+  };
+  function showFatal(message){
+    fatalError.textContent = message;
+    fatalError.style.display = "block";
+    throw new Error(message);
+  }
+  function parseRequiredJson(key, label){
+    const raw = sessionStorage.getItem(key);
+    if (!raw) {
+      showFatal(`error: missing sessionStorage key\n${key}\n(${label})`);
+    }
+    try {
+      return JSON.parse(raw);
+    } catch (err) {
+      showFatal(`error: bad json in sessionStorage key\n${key}\n(${label})`);
+    }
+  }
+  const pronounSlots = parseRequiredJson(PRONOUN_SLOT_KEY, "pronoun slot data");
+  const objectSlots = parseRequiredJson(OBJECT_SLOT_KEY, "object slot data");
+  const lnRaw = sessionStorage.getItem(LESSON_KEY);
+  if (!lnRaw) {
+    showFatal(`error: missing sessionStorage key\n${LESSON_KEY}\n(lesson number)`);
+  }
+  const ln = Number(lnRaw);
+  if (!Number.isInteger(ln) || ln < 1) {
+    showFatal(`error: invalid lesson number in key\n${LESSON_KEY}\nvalue: ${lnRaw}`);
+  }
+  const basePath = `./group/lesson${ln}`;
+  lessonBadge.textContent = `lesson ${ln}`;
+  function pronounImg(id){ return `${basePath}/pronouns/images/p${id}.png`; }
+  function pronounAud(id){ 
+  return `${basePath}/pronouns/audios/a${id}.m4a?v=${Date.now()}`; 
+}
+  function objectImg(id){ return `${basePath}/objects/images/p${id}.png`; }
+function objectAud(id){ return `${basePath}/objects/audios/a${id}.m4a?v=${Date.now()}`; }
+  function triggerImg(id){ return `./trigger/p${id}.png`; }
+  function translationAud(){ return `${basePath}/translation/1.m4a`; }
+  function addErrorBox(slot, message){
+    const box = document.createElement("div");
+    box.className = "error-box";
+    box.style.left = `${slot.x}px`;
+    box.style.top = `${slot.y}px`;
+    box.style.width = `${Math.max(80, slot.width)}px`;
+    box.style.minHeight = `${Math.max(60, slot.height)}px`;
+    box.textContent = message;
+    stage.appendChild(box);
+  }
+  function makeTile(slot, kind, imageSrc, fallbackName){
+    if (
+      typeof slot.x !== "number" ||
+      typeof slot.y !== "number" ||
+      typeof slot.width !== "number" ||
+      typeof slot.height !== "number"
+    ) {
+      addErrorBox({ x: 10, y: 10, width: 140, height: 80 }, `error\nbad slot data\n${fallbackName}`);
+      return null;
+    }
+    const tile = document.createElement("button");
+    tile.type = "button";
+    tile.className = `slot-tile ${kind}`;
+    tile.style.left = `${slot.x}px`;
+    tile.style.top = `${slot.y}px`;
+    tile.style.width = `${slot.width}px`;
+    tile.style.height = `${slot.height}px`;
+    tile.dataset.group = kind;
+    tile.dataset.index = String(slot.id);
+    tile.title = fallbackName;
+    tile.setAttribute("aria-label", fallbackName);
+    const img = document.createElement("img");
+    img.alt = fallbackName;
+    img.src = imageSrc;img.style.width = "100%";
+img.style.height = "100%";
+img.style.objectFit = "cover";
+img.style.display = "block"; 
+    img.onerror = function(){
+      tile.remove();
+      addErrorBox(slot, `error\nmissing file\n${imageSrc}`);
+    };
+    tile.appendChild(img);
+    stage.appendChild(tile);
+    return tile;
+  }
+  const pronounTilesById = new Map();
+  const objectTilesById = new Map();
+console.log("pronounSlots =", pronounSlots);
+pronounSlots.forEach(slot => {
+  const id = Number(slot.id);
+  console.log("building pronoun", id, pronounImg(id));
+  const name = pronounNameMap[id] || `pronoun ${id}`;
+  const tile = makeTile(slot, "pronoun", pronounImg(id), name);
+  if (tile) pronounTilesById.set(id, tile);
+});
+  objectSlots.forEach(slot => {
+    const id = Number(slot.id);
+    const name = objectNameMap[id] || `object ${id}`;
+    const tile = makeTile(slot, "object", objectImg(id), name);
+    if (tile) objectTilesById.set(id, tile);
+  });
+  const expressionIds = new Set([10,11 ]);
+  let selectedPronounId = null;
+  let playToken = 0;
+  function clearPronounSelection(){
+    selectedPronounId = null;
+    pronounTilesById.forEach(tile => tile.classList.remove("active"));
+  }
+  function selectPronoun(id){
+    clearPronounSelection();
+    selectedPronounId = id;
+    const tile = pronounTilesById.get(id);
+    if (tile) tile.classList.add("active");
+  }
+  function playSequence(sources){
+    playToken += 1;
+    const token = playToken;
+    let i = 0;
+    function next(){
+      if (token !== playToken) return;
+      if (i >= sources.length) return;
+      const src = sources[i++];
+      player.src = src;
+      player.currentTime = 0;
+      player.play().catch(() => {
+        const shortName = src.split("/").pop() || src;
+        addErrorBox({ x: 20, y: 20, width: 150, height: 80 }, `error\naudio play failed\n${shortName}`);
+      });
+    }
+    player.onended = function(){
+      if (token !== playToken) return;
+      next();
+    };
+    next();
+  }
+stage.addEventListener("click", function(ev){
+  const tile = ev.target.closest(".slot-tile");
+  if (!tile) return;
+
+  const group = tile.dataset.group;
+  const id = Number(tile.dataset.index);
+
+  console.log("CLICK group =", group, "id =", id);
+
+  if (group === "pronoun") {
+    const src = pronounAud(id);
+    console.log("PRONOUN src =", src);
+
+    if (expressionIds.has(id)) {
+      clearPronounSelection();
+      playSequence([src]);
+      return;
+    }
+
+    selectPronoun(id);
+    playSequence([src]);
+    return;
+  }
+
+ if (group === "object") {
+  const objSrc = objectAud(id);
+  console.log("OBJECT src =", objSrc);
+
+  if (selectedPronounId && !expressionIds.has(selectedPronounId)) {
+    const pronSrc = pronounAud(selectedPronounId);
+    console.log("JOINING =", pronSrc, "+", objSrc);
+    clearPronounSelection();
+    playSequence([pronSrc, objSrc]);
+  } else {
+    playSequence([objSrc]);
+  }
+  return;
+}
+});
+
+  function makeTriggerButton(i){
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "trigger-btn";
+    b.title = `trigger ${i}`;
+    b.setAttribute("aria-label", `trigger ${i}`);
+    const img = document.createElement("img");
+    img.alt = `trigger ${i}`;
+    img.src = triggerImg(i);
+    img.onerror = function(){
+      b.textContent = `t${i}`;
+    };
+    b.appendChild(img);
+    if (i === 1) {
+  b.onclick = function(){
+    const currentLesson = Number(sessionStorage.getItem("lesson")) || 1;
+    const nextLesson = currentLesson + 1;
+    sessionStorage.setItem("lesson", String(nextLesson));
+    window.location.href = "director.html";
+  };
+    } else if (i === 2) {
+      b.onclick = function(){
+        window.location.href = "about:blank";
+      };
+    } else if (i === 3) {
+      b.onclick = function(){
+        window.location.href = "lesson_select.html";
+      };
+    } else if (i === 4 || i === 5 || i === 6) {
+      b.classList.add("placeholder");
+      b.onclick = function(){
+        alert("under construction");
+      };
+    } else if (i === 7) {
+      b.onclick = function(){
+        window.location.href = "lagente.html";
+      };
+    } else if (i === 8) {
+      b.onclick = function(){
+        player.onended = null;
+        player.src = translationAud();
+        player.currentTime = 0;
+        player.play().catch(() => {
+          addErrorBox({ x: 20, y: 20, width: 150, height: 80 }, `error\nmissing or flawed\n${translationAud()}`);
+        });
+      };
+    }
+    return b;
+  }
+  for (let i = 1; i <= 8; i += 1) {
+    triggerBar.appendChild(makeTriggerButton(i));
+  }
+  triggerBar.appendChild(lessonBadge);
+})();
+</script>
+</body>
+</html>
