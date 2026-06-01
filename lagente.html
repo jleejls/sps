@@ -86,7 +86,7 @@
 
   <!-- Return button (English) -->
   <div style="text-align: center; margin-top: 10px;">
-    <button onclick="location.href='./structure.html'" style="position:absolute;top:83vh;">
+    <button onclick="location.href='./director.html'" style="position:absolute;top:83vh;">
       Continuar
     </button>
   </div>
@@ -99,6 +99,8 @@
   function playAny(n) {
     const files = [
       `${AUDIO_BASE}${n}.m4a`,  // preferred lowercase extension
+      `${AUDIO_BASE}${n}.mp3`,  // fallback
+      `${AUDIO_BASE}${n}.wav`   // optional extra fallback
     ];
 
     let i = 0;
@@ -130,6 +132,7 @@
       }
     });
   }
-</script>  
+</script>
+  
 </body>
 </html>

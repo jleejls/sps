@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Welcome to Your English Journey</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -118,11 +119,6 @@
 </head>
 
 <body>
-
-  <header>
-    <h2>Bienvenidos a Spanish Platica</h2>
-  </header>
-
   <!-- LEFT SIDE CREDITS CONTAINER -->
   <div id="credits">
     <h3>Creditos</h3>
@@ -137,17 +133,16 @@
   </div>
 
   <!-- RIGHT SIDE NOTICE CONTAINER -->
-  <div id="notice">
+ <div id="notice">
     <h3>Bajo Construccion</h3>
-    <p> This site is not ready for use. Este sitio no está listo para usar </p>
+    <p>Este sitio esta debajo construccion. Puede esperar errores y correcciones. </p>
 
   </div>
 
-   MAIN CENTER OPTIONS 
   <div id="container">
     <div class="section">
       <h2>Vuelve a estudiar</h2>
-      <button onclick="location.href='./structure.html'">Comience</button>
+      <button onclick="goToCorrectLane()">Comience</button>
     </div>
 
     <div class="section">
@@ -157,9 +152,19 @@
 
     <div class="section">
       <h2>Vuelva pronto</h2>
-      <button onclick="window.location.href='blank.html'">Salir</button>
+      <button onclick="window.location.href='./about:blank'">Salir</button>
     </div>
   </div>
+
+  <script>
+    function goToCorrectLane() {
+      if (window.innerWidth < 700) {
+        window.location.href = "ingles_phone/structure.html";
+      } else {
+        window.location.href = "ingles_desktop/structure.html";
+      }
+    }
+  </script>
 
 </body>
 </html>
