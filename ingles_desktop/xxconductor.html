@@ -306,9 +306,9 @@ for (let i = 0; i < sessionStorage.length; i++) {
 </main>
 
 <div id="pbar" class="zipbutton" aria-label="Program buttons">
-  <div class="buttonz" data-btn="continue" title="Advance to next page">
-  <img src="../trigger/adelante.png" alt="Advance">
-</div>
+  <div class="buttonz" data-btn="continue" title="Continuar / next lesson">
+    <img src="../trigger/adelante.png" alt="Adelante">
+  </div>
   <div class="buttonz" data-btn="exit" title="Exit to start page">
     <img src="../trigger/exit.png" alt="Exit">
   </div>
@@ -588,20 +588,18 @@ function closeContactOverlay(){
   }
 
   const actions = {
-    continue(){
-      const lessonNow = currentLesson();
-      const nextLesson = lessonNow + 1;
+continue(){
+  const lessonNow = currentLesson();
 
-      if (nextLesson > 20) {
-        alert("You are already on the last lesson.");
-        return;
-      }
+  if (lessonNow >= 20) {
+    alert("You are already on the last lesson.");
+    return;
+  }
 
-      sessionStorage.setItem("lesson", String(nextLesson));
-      sessionStorage.setItem("selectedLesson", String(nextLesson));
-
-      window.location.href = "conductor.html";
-    },
+  const nextLesson = lessonNow + 1;
+  sessionStorage.setItem("lesson", String(nextLesson));
+  window.location.reload();
+},
 
     exit(){
       goTo("index.html");
@@ -636,8 +634,8 @@ function closeContactOverlay(){
       const player = document.getElementById("player");
       if (!player) return;
 
-      // Shared group folder is one level above this conductor.
-      player.src = `../group/lesson${lesson}/translation/a1.m4a`;
+      // Change this path later if your translation audios live somewhere else.
+      player.src = `group/lesson${lesson}/translation/a1.m4a`;
       player.currentTime = 0;
       player.play().catch(err => console.log("translation play failed:", err));
     }
