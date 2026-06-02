@@ -205,7 +205,7 @@
 
     <!-- BUTTONS -->
     <section class="button-grid">
-      <button class="nav-button green" onclick="location.href='lesson_select.html'">
+      <button class="nav-button green" onclick="location.href='lessonselect.html'">
         <span class="icon">↑</span>
         First
       </button>
@@ -244,5 +244,15 @@
     </section>
 
   </main>
+
+  <script>
+    // Phone route handoff:
+    // This structure page is only a pass-through builder page.
+    // It should not require the learner to press a button.
+    window.addEventListener("DOMContentLoaded", function () {
+      window.location.replace("lessonselect.html");
+    });
+  </script>
+
 </body>
 </html>
