@@ -292,80 +292,35 @@
     </section>
 
   </main>
-
   <script>
-
-    // Temporary preview image loader:
-    // This lets the structure page show real lesson images when it is placed
-    // inside the project folder. It tries several common project paths.
-    // Later, conductor.html can still replace these images with its own data.
-    const PREVIEW_LESSON = 1;
-
-    function tryImagePaths(img, paths, index = 0) {
-      if (index >= paths.length) {
-        img.classList.add("missing");
-        return;
-      }
-
-      img.onerror = function () {
-        tryImagePaths(img, paths, index + 1);
-      };
-
-      img.onload = function () {
-        img.classList.remove("missing");
-      };
-
-      img.src = paths[index];
-    }
-
-    function loadPreviewImages() {
-      document.querySelectorAll(".frame img[data-kind]").forEach(function (img) {
-        const kind = img.dataset.kind;
-        const num = Number(img.dataset.num);
-        const lesson = PREVIEW_LESSON;
-
-        let paths = [];
-
-        if (kind === "pronoun") {
-          paths = [
-            `./group/lesson${lesson}/image/p${num}.png`,
-            `../group/lesson${lesson}/image/p${num}.png`,
-            `./group/lesson${lesson}/pronouns/images/img_${num}.png`,
-            `../group/lesson${lesson}/pronouns/images/img_${num}.png`,
-            `./group/lesson${lesson}/pronouns/image/p${num}.png`,
-            `../group/lesson${lesson}/pronouns/image/p${num}.png`
-          ];
-        }
-
-        if (kind === "object") {
-          paths = [
-            `./group/lesson${lesson}/image/o${num}.png`,
-            `../group/lesson${lesson}/image/o${num}.png`,
-            `./group/lesson${lesson}/image/p${num + 9}.png`,
-            `../group/lesson${lesson}/image/p${num + 9}.png`,
-            `./group/lesson${lesson}/objects/images/img_${num}.png`,
-            `../group/lesson${lesson}/objects/images/img_${num}.png`,
-            `./group/lesson${lesson}/objects/image/o${num}.png`,
-            `../group/lesson${lesson}/objects/image/o${num}.png`
-          ];
-        }
-
-        tryImagePaths(img, paths);
-      });
-    }
-
-    // PHONE LAYOUT TEST NOTE:
-    // I left auto-advance OFF so you can open this file and actually see the layout.
-    // When this page is ready to be used only as a pass-through builder page,
-    // change AUTO_ADVANCE to true.
-    const AUTO_ADVANCE = false;
-
+    // PHONE STRUCTURE BUILDER
+    // This page quietly prepares the phone layout data, then sends the learner
+    // to lessonselect.html. The learner does not need to see this page.
     window.addEventListener("DOMContentLoaded", function () {
-      loadPreviewImages();
-
-      if (AUTO_ADVANCE) {
-        window.location.replace("lessonselect.html");
+      const pronounSlots = [];
+      for (let i = 1; i <= 9; i++) {
+        pronounSlots.push({ id: i, kind: "main" });
       }
+
+      const objectSlots = [];
+      for (let i = 1; i <= 11; i++) {
+        objectSlots.push({ id: i });
+      }
+
+      sessionStorage.setItem("pronounSlots", JSON.stringify(pronounSlots));
+      sessionStorage.setItem("objectSlots", JSON.stringify(objectSlots));
+      sessionStorage.setItem("expressionPronounIds", JSON.stringify([]));
+
+      if (!sessionStorage.getItem("tense")) {
+        sessionStorage.setItem("tense", "now");
+      }
+
+      if (!sessionStorage.getItem("lesson") && !sessionStorage.getItem("selectedLesson")) {
+        sessionStorage.setItem("lesson", "1");
+        sessionStorage.setItem("selectedLesson", "1");
+      }
+
+      window.location.replace("lessonselect.html");
     });
   </script>
 

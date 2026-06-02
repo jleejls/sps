@@ -176,7 +176,32 @@
 
 <script>
   function goToLesson(lessonNumber) {
-    sessionStorage.setItem("selectedLesson", String(lessonNumber));
+    const lesson = String(lessonNumber);
+    sessionStorage.setItem("selectedLesson", lesson);
+    sessionStorage.setItem("lesson", lesson);
+    sessionStorage.setItem("currentLesson", lesson);
+
+    // Safety: if the structure builder was skipped, create the phone slot data here too.
+    if (!sessionStorage.getItem("pronounSlots")) {
+      const pronounSlots = [];
+      for (let i = 1; i <= 9; i++) pronounSlots.push({ id: i, kind: "main" });
+      sessionStorage.setItem("pronounSlots", JSON.stringify(pronounSlots));
+    }
+
+    if (!sessionStorage.getItem("objectSlots")) {
+      const objectSlots = [];
+      for (let i = 1; i <= 11; i++) objectSlots.push({ id: i });
+      sessionStorage.setItem("objectSlots", JSON.stringify(objectSlots));
+    }
+
+    if (!sessionStorage.getItem("expressionPronounIds")) {
+      sessionStorage.setItem("expressionPronounIds", JSON.stringify([]));
+    }
+
+    if (!sessionStorage.getItem("tense")) {
+      sessionStorage.setItem("tense", "now");
+    }
+
     window.location.href = "conductor.html";
   }
 </script>
