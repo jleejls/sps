@@ -67,6 +67,10 @@
       display: block;
     }
 
+    .frame img.missing {
+      display: none;
+    }
+
     /* Keep placeholder in the code, but hide the words from the screen. */
     .placeholder {
       font-size: 0;
@@ -213,36 +217,36 @@
 
     <!-- PRONOUNS 1-9: no visible text labels -->
     <section class="frame-grid-3" aria-label="Pronouns">
-      <div class="frame" id="pronoun-1"><div class="placeholder">pronoun 1</div></div>
-      <div class="frame" id="pronoun-2"><div class="placeholder">pronoun 2</div></div>
-      <div class="frame" id="pronoun-3"><div class="placeholder">pronoun 3</div></div>
+      <div class="frame" id="pronoun-1"><img alt="" data-kind="pronoun" data-num="1"></div>
+      <div class="frame" id="pronoun-2"><img alt="" data-kind="pronoun" data-num="2"></div>
+      <div class="frame" id="pronoun-3"><img alt="" data-kind="pronoun" data-num="3"></div>
 
-      <div class="frame" id="pronoun-4"><div class="placeholder">pronoun 4</div></div>
-      <div class="frame" id="pronoun-5"><div class="placeholder">pronoun 5</div></div>
-      <div class="frame" id="pronoun-6"><div class="placeholder">pronoun 6</div></div>
+      <div class="frame" id="pronoun-4"><img alt="" data-kind="pronoun" data-num="4"></div>
+      <div class="frame" id="pronoun-5"><img alt="" data-kind="pronoun" data-num="5"></div>
+      <div class="frame" id="pronoun-6"><img alt="" data-kind="pronoun" data-num="6"></div>
 
-      <div class="frame" id="pronoun-7"><div class="placeholder">pronoun 7</div></div>
-      <div class="frame" id="pronoun-8"><div class="placeholder">pronoun 8</div></div>
-      <div class="frame" id="pronoun-9"><div class="placeholder">pronoun 9</div></div>
+      <div class="frame" id="pronoun-7"><img alt="" data-kind="pronoun" data-num="7"></div>
+      <div class="frame" id="pronoun-8"><img alt="" data-kind="pronoun" data-num="8"></div>
+      <div class="frame" id="pronoun-9"><img alt="" data-kind="pronoun" data-num="9"></div>
     </section>
 
     <!-- OBJECTS 1-11: no visible text labels -->
     <section class="object-grid" aria-label="Objects">
-      <div class="frame" id="object-1"><div class="placeholder">object 1</div></div>
-      <div class="frame" id="object-2"><div class="placeholder">object 2</div></div>
-      <div class="frame" id="object-3"><div class="placeholder">object 3</div></div>
+      <div class="frame" id="object-1"><img alt="" data-kind="object" data-num="1"></div>
+      <div class="frame" id="object-2"><img alt="" data-kind="object" data-num="2"></div>
+      <div class="frame" id="object-3"><img alt="" data-kind="object" data-num="3"></div>
 
-      <div class="frame" id="object-4"><div class="placeholder">object 4</div></div>
-      <div class="frame" id="object-5"><div class="placeholder">object 5</div></div>
-      <div class="frame" id="object-6"><div class="placeholder">object 6</div></div>
+      <div class="frame" id="object-4"><img alt="" data-kind="object" data-num="4"></div>
+      <div class="frame" id="object-5"><img alt="" data-kind="object" data-num="5"></div>
+      <div class="frame" id="object-6"><img alt="" data-kind="object" data-num="6"></div>
 
-      <div class="frame" id="object-7"><div class="placeholder">object 7</div></div>
-      <div class="frame" id="object-8"><div class="placeholder">object 8</div></div>
-      <div class="frame" id="object-9"><div class="placeholder">object 9</div></div>
+      <div class="frame" id="object-7"><img alt="" data-kind="object" data-num="7"></div>
+      <div class="frame" id="object-8"><img alt="" data-kind="object" data-num="8"></div>
+      <div class="frame" id="object-9"><img alt="" data-kind="object" data-num="9"></div>
 
-      <div class="frame" id="object-10"><div class="placeholder">object 10</div></div>
+      <div class="frame" id="object-10"><img alt="" data-kind="object" data-num="10"></div>
       <div class="lesson-slot" id="lesson-slot">lesson<br>1</div>
-      <div class="frame" id="object-11"><div class="placeholder">object 11</div></div>
+      <div class="frame" id="object-11"><img alt="" data-kind="object" data-num="11"></div>
     </section>
 
     <div class="lesson-badge" id="lesson-badge">tense-now&nbsp;&nbsp;lesson-1</div>
@@ -290,6 +294,66 @@
   </main>
 
   <script>
+
+    // Temporary preview image loader:
+    // This lets the structure page show real lesson images when it is placed
+    // inside the project folder. It tries several common project paths.
+    // Later, conductor.html can still replace these images with its own data.
+    const PREVIEW_LESSON = 1;
+
+    function tryImagePaths(img, paths, index = 0) {
+      if (index >= paths.length) {
+        img.classList.add("missing");
+        return;
+      }
+
+      img.onerror = function () {
+        tryImagePaths(img, paths, index + 1);
+      };
+
+      img.onload = function () {
+        img.classList.remove("missing");
+      };
+
+      img.src = paths[index];
+    }
+
+    function loadPreviewImages() {
+      document.querySelectorAll(".frame img[data-kind]").forEach(function (img) {
+        const kind = img.dataset.kind;
+        const num = Number(img.dataset.num);
+        const lesson = PREVIEW_LESSON;
+
+        let paths = [];
+
+        if (kind === "pronoun") {
+          paths = [
+            `./group/lesson${lesson}/image/p${num}.png`,
+            `../group/lesson${lesson}/image/p${num}.png`,
+            `./group/lesson${lesson}/pronouns/images/img_${num}.png`,
+            `../group/lesson${lesson}/pronouns/images/img_${num}.png`,
+            `./group/lesson${lesson}/pronouns/image/p${num}.png`,
+            `../group/lesson${lesson}/pronouns/image/p${num}.png`
+          ];
+        }
+
+        if (kind === "object") {
+          paths = [
+            `./group/lesson${lesson}/image/o${num}.png`,
+            `../group/lesson${lesson}/image/o${num}.png`,
+            `./group/lesson${lesson}/image/p${num + 9}.png`,
+            `../group/lesson${lesson}/image/p${num + 9}.png`,
+            `./group/lesson${lesson}/objects/images/img_${num}.png`,
+            `../group/lesson${lesson}/objects/images/img_${num}.png`,
+            `./group/lesson${lesson}/objects/image/o${num}.png`,
+            `../group/lesson${lesson}/objects/image/o${num}.png`
+          ];
+        }
+
+        tryImagePaths(img, paths);
+      });
+    }
+
     // PHONE LAYOUT TEST NOTE:
     // I left auto-advance OFF so you can open this file and actually see the layout.
     // When this page is ready to be used only as a pass-through builder page,
@@ -297,6 +361,8 @@
     const AUTO_ADVANCE = false;
 
     window.addEventListener("DOMContentLoaded", function () {
+      loadPreviewImages();
+
       if (AUTO_ADVANCE) {
         window.location.replace("lessonselect.html");
       }
