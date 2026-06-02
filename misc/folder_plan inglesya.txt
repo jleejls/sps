@@ -1,0 +1,17 @@
+TWO-LANE STRUCTURE PLAN
+
+index.html detects screen width.
+
+Desktop:
+desktop/structure.html
+desktop/lesson_select.html
+desktop/conductor.html
+
+Phone:
+phone/structure.html
+phone/lesson_select.html
+phone/conductor.html
+
+Shared assets:
+group/lesson#/image/
+group/lesson#/sound/
