@@ -1,268 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Phone Director Structure Test - 3-4-3-4-3</title>
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>InglesYa Phone Structure</title>
 <style>
-  * {
-    box-sizing: border-box;
-  }
+  * { box-sizing: border-box; }
 
-  :root {
-    --page-bg: #f4f5f7;
-    --frame-bg: #ffffff;
-    --frame-border: #cfd6de;
-
-    /*
-      Visual test only.
-
-      Correct pattern:
-      Row 1: 3 squares
-      Row 2: 4 squares
-      Row 3: 3 squares
-      Row 4: 4 squares
-      Row 5: 3 squares
-
-      Total squares:
-      7 pronouns + 10 objects = 17 squares
-
-      Then:
-      2 circular expression frames
-
-      Then:
-      bottom buttons
-    */
-    --frame-size: 70px;
-    --gap: 5px;
-    --circle-size: 44px;
-    --button-height: 39px;
-    --radius: 10px;
-  }
-
-  html,
-  body {
+  html, body {
     margin: 0;
     min-height: 100%;
     font-family: Arial, Helvetica, sans-serif;
-    background: var(--page-bg);
+    background: #f4f5f7;
     color: #222;
   }
 
   body {
     display: flex;
-    justify-content: center;
-  }
-
-  .phone-page {
-    width: 100%;
-    max-width: 420px;
-    min-height: 100vh;
-    padding: 5px 5px 56px;
-  }
-
-  .lesson-badge {
-    width: 168px;
-    min-height: 26px;
-    margin: 0 auto 5px;
-    background: #f3da9c;
-    border: 1px solid #d7ba73;
-    border-radius: 999px;
-    display: flex;
     align-items: center;
     justify-content: center;
-    text-align: center;
-    font-size: 12px;
-    color: #5a4920;
-    padding: 3px 9px;
-    font-weight: bold;
   }
 
-  .frame-area {
-    margin: 0 auto;
-  }
-
-  .row {
-    display: flex;
-    justify-content: center;
-    gap: var(--gap);
-    margin-bottom: var(--gap);
-  }
-
-  .frame {
-    width: var(--frame-size);
-    height: var(--frame-size);
-    border-radius: var(--radius);
-    background: var(--frame-bg);
-    border: 1px solid var(--frame-border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    font-size: 12px;
-    font-weight: bold;
-    color: #666;
-  }
-
-  .pronoun {
-    background: #fffdf7;
-  }
-
-  .object {
-    background: #f9fbff;
-  }
-
-  .expression-row {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 22px;
-    min-height: 48px;
-    margin: 2px auto 4px;
-  }
-
-  .expression-circle {
-    width: var(--circle-size);
-    height: var(--circle-size);
-    border-radius: 50%;
-    background: #ffffff;
-    border: 2px solid #9a74b8;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: bold;
-    color: #5b3972;
-    box-shadow: 0 2px 6px rgba(0,0,0,.14);
-  }
-
-  .button-grid {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    max-width: 420px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 4px;
-    background: rgba(245,245,245,.98);
-    border-top: 1px solid #d7d7d7;
-    padding: 5px;
-    z-index: 80;
-  }
-
-  .button {
-    height: var(--button-height);
-    border-radius: 8px;
-    border: 1px solid #999;
+  .message {
+    width: min(90vw, 360px);
     background: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 17px;
-  }
-
-  @media (max-width: 380px) {
-    :root {
-      --frame-size: 66px;
-      --gap: 4px;
-      --circle-size: 41px;
-      --button-height: 37px;
-    }
-
-    .phone-page {
-      padding-left: 4px;
-      padding-right: 4px;
-      padding-bottom: 54px;
-    }
-
-    .lesson-badge {
-      width: 155px;
-      min-height: 24px;
-      margin-bottom: 4px;
-      font-size: 11px;
-    }
-
-    .expression-row {
-      min-height: 44px;
-      margin-bottom: 3px;
-    }
-  }
-
-  @media (max-width: 330px) {
-    :root {
-      --frame-size: 60px;
-      --gap: 4px;
-      --circle-size: 38px;
-      --button-height: 35px;
-    }
-
-    .phone-page {
-      padding-bottom: 52px;
-    }
+    border: 1px solid #d7dbe3;
+    border-radius: 14px;
+    padding: 18px;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,.12);
   }
 </style>
 </head>
-
 <body>
-  <main class="phone-page">
-    <div class="lesson-badge">phone test&nbsp;&nbsp;lesson-1</div>
-
-    <section class="frame-area" aria-label="Phone square frame structure">
-      <!-- Rows 1 and 2: 7 pronoun frames -->
-      <div class="row row-3" aria-label="Pronoun row 1">
-        <div class="frame pronoun">P1</div>
-        <div class="frame pronoun">P2</div>
-        <div class="frame pronoun">P3</div>
-      </div>
-
-      <div class="row row-4" aria-label="Pronoun row 2">
-        <div class="frame pronoun">P4</div>
-        <div class="frame pronoun">P5</div>
-        <div class="frame pronoun">P6</div>
-        <div class="frame pronoun">P7</div>
-      </div>
-
-      <!-- Rows 3, 4, and 5: 10 object frames -->
-      <div class="row row-3" aria-label="Object row 1">
-        <div class="frame object">O1</div>
-        <div class="frame object">O2</div>
-        <div class="frame object">O3</div>
-      </div>
-
-      <div class="row row-4" aria-label="Object row 2">
-        <div class="frame object">O4</div>
-        <div class="frame object">O5</div>
-        <div class="frame object">O6</div>
-        <div class="frame object">O7</div>
-      </div>
-
-      <div class="row row-3" aria-label="Object row 3">
-        <div class="frame object">O8</div>
-        <div class="frame object">O9</div>
-        <div class="frame object">O10</div>
-      </div>
-    </section>
-
-    <!-- Two circular expression frames below all square frames -->
-    <section class="expression-row" aria-label="Expression speakers">
-      <div class="expression-circle">E1</div>
-      <div class="expression-circle">E2</div>
-    </section>
+  <main class="message">
+    Preparing the phone lesson layout...
   </main>
 
-  <!-- Dummy button bar for visual height testing only -->
-  <nav class="button-grid" aria-label="Program buttons">
-    <div class="button">↑</div>
-    <div class="button">⤴</div>
-    <div class="button">☰</div>
-    <div class="button">?</div>
-    <div class="button">✉</div>
-    <div class="button">$</div>
-    <div class="button">↩</div>
-    <div class="button">T</div>
-  </nav>
+<script>
+  // PHONE STRUCTURE BUILDER
+  // This page prepares the phone layout data, then sends the learner
+  // to lessonselect.html.
+  window.addEventListener("DOMContentLoaded", function () {
+    const pronounSlots = [];
+    for (let i = 1; i <= 7; i++) {
+      pronounSlots.push({ id: i, kind: "main" });
+    }
+
+    const objectSlots = [];
+    for (let i = 1; i <= 10; i++) {
+      objectSlots.push({ id: i });
+    }
+
+    const expressionSlots = [{ id: 8 }, { id: 9 }];
+
+    sessionStorage.setItem("pronounSlots", JSON.stringify(pronounSlots));
+    sessionStorage.setItem("objectSlots", JSON.stringify(objectSlots));
+    sessionStorage.setItem("expressionSlots", JSON.stringify(expressionSlots));
+    sessionStorage.setItem("expressionPronounIds", JSON.stringify([8, 9]));
+
+    if (!sessionStorage.getItem("tense")) {
+      sessionStorage.setItem("tense", "now");
+    }
+
+    if (!sessionStorage.getItem("lesson") && !sessionStorage.getItem("selectedLesson")) {
+      sessionStorage.setItem("lesson", "1");
+      sessionStorage.setItem("selectedLesson", "1");
+    }
+
+    window.location.replace("lessonselect.html");
+  });
+</script>
 </body>
 </html>

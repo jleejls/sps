@@ -7,13 +7,6 @@
 <style>
   *{ box-sizing:border-box; }
 
-  :root{
-    --frame-size:70px;
-    --gap:5px;
-    --circle-size:44px;
-    --button-height:39px;
-  }
-
   html, body{
     margin:0;
     width:100%;
@@ -24,25 +17,57 @@
   }
 
   body{
-    padding-bottom:56px; /* keeps bottom buttons from covering lower pictures */
+    padding-bottom:70px; /* keeps bottom buttons from covering lower pictures */
   }
 
-  header, h3{ display:none; }
+  header{
+    display:none;
+  }
 
   main{
     width:100%;
     max-width:420px;
     margin:0 auto;
-    padding:5px 5px 2px;
+    padding:5px;
   }
 
-  .section-box{ margin-bottom:5px; }
+  h3{
+    display:none;
+  }
 
-  .row{
-    display:flex;
-    justify-content:center;
+  .section-box{
+    margin-bottom:8px;
+  }
+
+  /* Compact phone layout: three across, no text headings. */
+  :root{
+    --frame-size:76px;
+    --gap:6px;
+  }
+
+  .phone-grid{
+    display:grid;
+    grid-template-columns:repeat(3, var(--frame-size));
     gap:var(--gap);
-    margin-bottom:var(--gap);
+    justify-content:center;
+  }
+
+  .object-grid{
+    grid-template-columns:repeat(6, calc(var(--frame-size) / 2));
+    grid-auto-rows:var(--frame-size);
+    gap:var(--gap) 0;
+  }
+
+  .object-grid .tile{
+    grid-column:span 2;
+  }
+
+  .object-grid .tile:nth-child(10){
+    grid-column:2 / span 2;
+  }
+
+  .object-grid .tile:nth-child(11){
+    grid-column:4 / span 2;
   }
 
   .tile{
@@ -59,9 +84,6 @@
     justify-content:center;
   }
 
-  .pronoun-tile{ background:#fffdf7; }
-  .object-tile{ background:#f9fbff; }
-
   .tile img{
     width:96%;
     height:96%;
@@ -69,42 +91,13 @@
     display:block;
   }
 
-  .object-tile img{ transform:scale(1.08); }
+  .object-tile img{
+    transform:scale(1.08);
+  }
 
   .tile.selected{
     outline:4px solid #c00000;
     outline-offset:-4px;
-  }
-
-  .expression-row{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:22px;
-    min-height:46px;
-    margin:0 auto 2px;
-  }
-
-  .expression-circle{
-    width:var(--circle-size);
-    height:var(--circle-size);
-    border-radius:50%;
-    border:2px solid #9a74b8;
-    background:#ffffff;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    overflow:hidden;
-    cursor:pointer;
-    box-shadow:0 2px 6px rgba(0,0,0,.14);
-  }
-
-  .expression-circle img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    display:block;
-    pointer-events:none;
   }
 
   .label{
@@ -115,14 +108,11 @@
     white-space:pre-line;
   }
 
-  .expression-circle .label{
-    font-size:10px;
-    color:#5b3972;
+  .foot{
+    display:none;
   }
 
-  .foot{ display:none; }
-
-  /* Bottom image-button bar */
+  /* Bottom button bar */
   .zipbutton{
     position:fixed;
     left:0;
@@ -134,13 +124,11 @@
     gap:4px;
     background:#f0f0f0;
     border-top:1px solid #ddd;
-    padding:5px;
-    max-width:420px;
-    margin:0 auto;
+    padding:6px;
   }
 
   .buttonz{
-    min-height:var(--button-height);
+    min-height:38px;
     border:2px solid #4CAF50;
     border-radius:9px;
     background:#d05000;
@@ -168,7 +156,9 @@
     padding:20px;
   }
 
-  .contact-overlay[hidden]{ display:none; }
+  .contact-overlay[hidden]{
+    display:none;
+  }
 
   .contact-box{
     background:white;
@@ -201,16 +191,14 @@
   }
 
   @media (max-width:380px){
-    :root{ --frame-size:66px; --gap:4px; --circle-size:41px; --button-height:37px; }
-    main{ padding:4px 4px 1px; }
-    .section-box{ margin-bottom:4px; }
-    .expression-row{ min-height:43px; margin-bottom:1px; }
+    :root{ --frame-size:68px; --gap:5px; }
+    main{ padding:4px; }
+    .buttonz{ min-height:34px; }
     .buttonz img{ max-height:31px; }
   }
 
   @media (max-width:330px){
-    :root{ --frame-size:60px; --gap:4px; --circle-size:38px; --button-height:35px; }
-    body{ padding-bottom:52px; }
+    :root{ --frame-size:62px; --gap:4px; }
   }
 </style>
 
@@ -249,15 +237,13 @@ for (let i = 0; i < sessionStorage.length; i++) {
 <main>
   <section class="section-box">
     <h3>Pronouns</h3>
-    <div id="pronouns" class="phone-rows"></div>
+    <div id="pronouns" class="phone-grid"></div>
   </section>
 
   <section class="section-box">
     <h3>Objects</h3>
-    <div id="objects" class="phone-rows"></div>
+    <div id="objects" class="phone-grid object-grid"></div>
   </section>
-
-  <section id="expressions" class="expression-row" aria-label="Expression speakers"></section>
 </main>
 
 <div id="pbar" class="zipbutton" aria-label="Program buttons">
@@ -310,30 +296,19 @@ for (let i = 0; i < sessionStorage.length; i++) {
   // ----- Layout + selection data from sessionStorage -----
   const pronounSlots = JSON.parse(sessionStorage.getItem("pronounSlots") || "[]");
   const objectSlots  = JSON.parse(sessionStorage.getItem("objectSlots")  || "[]");
-  let expressionSlots = JSON.parse(sessionStorage.getItem("expressionSlots") || "[]");
   const exprIds      = JSON.parse(sessionStorage.getItem("expressionPronounIds") || "[]");
 
-  // Fallback/repair layout so page still works if old storage was left over.
-  if (pronounSlots.length !== 7) {
-    pronounSlots.length = 0;
-    for (let i = 1; i <= 7; i++) {
-      pronounSlots.push({ id: i, kind: "main" });
+  // Fallback layout so page still works if nothing was stored.
+  if (!pronounSlots.length) {
+    for (let i = 1; i <= 9; i++) {
+      pronounSlots.push({ id: i, kind: i <= 7 ? "main" : "expression" });
     }
-    sessionStorage.setItem("pronounSlots", JSON.stringify(pronounSlots));
   }
 
-  if (objectSlots.length !== 10) {
-    objectSlots.length = 0;
-    for (let i = 1; i <= 10; i++) {
+  if (!objectSlots.length) {
+    for (let i = 1; i <= 11; i++) {
       objectSlots.push({ id: i });
     }
-    sessionStorage.setItem("objectSlots", JSON.stringify(objectSlots));
-  }
-
-  if (expressionSlots.length !== 2) {
-    expressionSlots = [{ id: 8 }, { id: 9 }];
-    sessionStorage.setItem("expressionSlots", JSON.stringify(expressionSlots));
-    sessionStorage.setItem("expressionPronounIds", JSON.stringify([8, 9]));
   }
 
   const tense = sessionStorage.getItem("tense") || "now";
@@ -359,6 +334,7 @@ for (let i = 0; i < sessionStorage.length; i++) {
   // 1) older split folders: pronouns/images, objects/images, pronouns/audios, objects/audios
   // 2) newer single folders: image and sound
   const pronImg = i => [
+    // most likely: phone pronoun 1 uses main image p11, pronoun 2 uses p12, etc.
     `${basePath}/image/p${i + 10}.png`,
     `${basePath}/image/p${i}.png`,
     `${basePath}/pronouns/images/p${i}.png`,
@@ -367,6 +343,7 @@ for (let i = 0; i < sessionStorage.length; i++) {
   ];
 
   const objImg = i => [
+    // most likely: object 1 uses image p1, object 2 uses p2, etc.
     `${basePath}/image/p${i}.png`,
     `${basePath}/image/o${i}.png`,
     `${basePath}/objects/images/p${i}.png`,
@@ -412,51 +389,29 @@ for (let i = 0; i < sessionStorage.length; i++) {
     return d;
   }
 
-  function buildRows(mount, slots, rowPattern, buildTile){
-    let n = 0;
-    rowPattern.forEach(count => {
-      const row = document.createElement("div");
-      row.className = "row";
-      for (let j = 0; j < count; j++) {
-        if (n >= slots.length) break;
-        row.appendChild(buildTile(slots[n++]));
-      }
-      mount.appendChild(row);
-    });
-  }
-
-  // ----- Build pronoun tiles: 3 + 4 -----
+  // ----- Build pronoun tiles -----
   const pronMount = document.getElementById("pronouns");
-  buildRows(pronMount, pronounSlots, [3, 4], slot => {
+  pronounSlots.forEach(slot => {
     const t = makeTile(pronImg(slot.id), `p${slot.id}.png`, "pronoun-tile");
     t.dataset.group = "pronouns";
     t.dataset.index = slot.id;
     t.dataset.kind  = slot.kind || "main";
-    return t;
+    pronMount.appendChild(t);
   });
 
-  // ----- Build object tiles: 3 + 4 + 3 -----
+  // ----- Build object tiles -----
   const objMount = document.getElementById("objects");
-  buildRows(objMount, objectSlots, [3, 4, 3], slot => {
+  objectSlots.forEach(slot => {
     const t = makeTile(objImg(slot.id), `p${slot.id}.png`, "object-tile");
     t.dataset.group = "objects";
     t.dataset.index = slot.id;
-    return t;
-  });
-
-  // ----- Build expression circles: 2 centered below the square frames -----
-  const exprMount = document.getElementById("expressions");
-  expressionSlots.forEach(slot => {
-    const t = makeTile(pronImg(slot.id), `expression p${slot.id}.png`, "expression-circle");
-    t.dataset.group = "expressions";
-    t.dataset.index = slot.id;
-    exprMount.appendChild(t);
+    objMount.appendChild(t);
   });
 
   // Debug badge
   const foot = document.createElement("div");
   foot.className = "foot";
-  foot.textContent = `tense=${tense}  lesson=${lesson}  P=${pronounSlots.length}  O=${objectSlots.length}  E=${expressionSlots.length}`;
+  foot.textContent = `tense=${tense}  lesson=${lesson}  P=${pronounSlots.length}  O=${objectSlots.length}`;
   document.body.appendChild(foot);
 
   // ----- Audio logic: no overlaps, serial uniting -----
@@ -465,6 +420,10 @@ for (let i = 0; i < sessionStorage.length; i++) {
   let lastPronJoinable = false;
   let selectedPronTile = null;
   let playToken = 0;
+
+  function isExpressionPronoun(index){
+    return exprIds.includes(index);
+  }
 
   function clearPronounSelection(){
     if (selectedPronTile) selectedPronTile.classList.remove("selected");
@@ -521,26 +480,26 @@ for (let i = 0; i < sessionStorage.length; i++) {
 
   // ----- Click handling -----
   document.addEventListener("click", ev => {
-    const el = ev.target.closest("[data-group][data-index]");
+    const el = ev.target.closest(".tile[data-group][data-index]");
     if (!el) return;
 
     const group = el.dataset.group;
     const index = Number(el.dataset.index);
 
-    if (group === "expressions") {
-      lastPronSrc = null;
-      lastPronJoinable = false;
-      clearPronounSelection();
-      playSequence([pronAud(index)]);
-      return;
-    }
-
     if (group === "pronouns") {
       const src = pronAud(index);
-      lastPronSrc = src;
-      lastPronJoinable = true;
-      selectPronounTile(el);
-      playSequence([src]);
+
+      if (isExpressionPronoun(index)) {
+        lastPronSrc = null;
+        lastPronJoinable = false;
+        clearPronounSelection();
+        playSequence([src]);
+      } else {
+        lastPronSrc = src;
+        lastPronJoinable = true;
+        selectPronounTile(el);
+        playSequence([src]);
+      }
       return;
     }
 
