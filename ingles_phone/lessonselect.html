@@ -199,6 +199,24 @@
     sessionStorage.setItem("objectSlots", JSON.stringify(objectSlots));
     sessionStorage.setItem("expressionSlots", JSON.stringify(expressionSlots));
     sessionStorage.setItem("expressionPronounIds", JSON.stringify([8, 9]));
+    const phoneLayoutConfig = {
+      layoutName: "phone-fixed-3-4-3-4-3-direct",
+      frameScale: 1,
+      rowGapPx: 2,
+      columnGapPx: 2,
+      preventScrolling: false,
+      preserveFrameOrder: true,
+      rows: [
+        { group: "pronouns", ids: [1, 2, 3] },
+        { group: "pronouns", ids: [4, 5, 6, 7] },
+        { group: "objects",  ids: [1, 2, 3] },
+        { group: "objects",  ids: [4, 5, 6, 7] },
+        { group: "objects",  ids: [8, 9, 10] },
+        { group: "expressions", ids: [8, 9] }
+      ]
+    };
+
+    sessionStorage.setItem("phoneLayoutConfig", JSON.stringify(phoneLayoutConfig));
 
     if (!sessionStorage.getItem("tense")) {
       sessionStorage.setItem("tense", "now");

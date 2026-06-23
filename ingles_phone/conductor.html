@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>PHONE TEST 623</title>
+<title>Phone Conductor</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <style>
   *{ box-sizing:border-box; }
@@ -419,9 +419,9 @@ for (let i = 0; i < sessionStorage.length; i++) {
 </script>
 </head>
 
-<body class="layout-loading">
+<body>
 
-<div id="prepOverlay" class="prep-overlay" aria-live="polite" aria-label="Lesson preparation message">
+<div id="prepOverlay" class="prep-overlay done" aria-live="polite" aria-label="Lesson preparation message">
   <div class="prep-card">
     <div class="prep-spinner" aria-hidden="true"></div>
     <p class="prep-message">Your lesson is being prepared...</p>
@@ -526,7 +526,22 @@ for (let i = 0; i < sessionStorage.length; i++) {
   sessionStorage.setItem("lesson", String(lesson));
   sessionStorage.setItem("selectedLesson", String(lesson));
 
-  const phoneLayoutConfig = readJSON("phoneLayoutConfig", null);
+  const phoneLayoutConfig = readJSON("phoneLayoutConfig", null) || {
+    layoutName: "phone-fixed-3-4-3-4-3-direct",
+    frameScale: 1,
+    rowGapPx: 2,
+    columnGapPx: 2,
+    preventScrolling: false,
+    preserveFrameOrder: true,
+    rows: [
+      { group:"pronouns", ids:[1,2,3] },
+      { group:"pronouns", ids:[4,5,6,7] },
+      { group:"objects", ids:[1,2,3] },
+      { group:"objects", ids:[4,5,6,7] },
+      { group:"objects", ids:[8,9,10] },
+      { group:"expressions", ids:[8,9] }
+    ]
+  };
   const storedPronounSlots = readJSON("pronounSlots", []);
   const storedObjectSlots = readJSON("objectSlots", []);
   const storedExpressionSlots = readJSON("expressionSlots", []);
@@ -597,31 +612,25 @@ for (let i = 0; i < sessionStorage.length; i++) {
   // 2) newer single folders: image and sound
   const pronImg = i => [
     `${basePath}/image/p${i + 10}.jpg`,
-    `${basePath}/image/p${i}.jpg`,
     `${basePath}/pronouns/images/p${i}.jpg`,
-    `${basePath}/pronouns/images/img_${i}.jpg`,
-    `${basePath}/pronouns/image/p${i}.jpg`
+    `${basePath}/image/p${i}.jpg`
   ];
 
   const objImg = i => [
     `${basePath}/image/p${i}.jpg`,
-    `${basePath}/image/o${i}.jpg`,
     `${basePath}/objects/images/p${i}.jpg`,
-    `${basePath}/objects/images/img_${i}.jpg`,
-    `${basePath}/objects/image/o${i}.jpg`,
-    `${basePath}/image/p${i + 9}.jpg`,
-    `${basePath}/image/p${i + 10}.jpg`
+    `${basePath}/image/o${i}.jpg`
   ];
 
   const pronAud = i => [
-    `${basePath}/pronouns/audios/a${i}.m4a`,
     `${basePath}/sound/${i + 10}.m4a`,
+    `${basePath}/pronouns/audios/a${i}.m4a`,
     `${basePath}/sound/${i}.m4a`
   ];
 
   const objAud = i => [
-    `${basePath}/objects/audios/a${i}.m4a`,
-    `${basePath}/sound/${i}.m4a`
+    `${basePath}/sound/${i}.m4a`,
+    `${basePath}/objects/audios/a${i}.m4a`
   ];
 
   // ----- Conversation-circle audio paths -----
@@ -766,32 +775,8 @@ for (let i = 0; i < sessionStorage.length; i++) {
     previousRowGroup = rowGroup;
   });
 
-  // Keep the screen hidden until the picture elements have finished loading.
-  // This prevents a momentary flash of empty frames before the finished layout appears.
-  (function revealLayoutWhenImagesAreReady(){
-    const startedAt = Date.now();
-    const maximumWait = 1800;
-
-    function reveal(){
-      document.body.classList.remove("layout-loading");
-    }
-
-    function allTilesReady(){
-      const tiles = Array.from(mount.querySelectorAll(".tile"));
-      if (!tiles.length) return true;
-      return tiles.every(tile => tile.dataset.ready === "yes");
-    }
-
-    function check(){
-      if (allTilesReady() || Date.now() - startedAt > maximumWait) {
-        requestAnimationFrame(reveal);
-      } else {
-        window.setTimeout(check, 40);
-      }
-    }
-
-    check();
-  })();
+  // Show the layout immediately. Images may fill in as they arrive.
+  document.body.classList.remove("layout-loading");
 
   // Debug badge
   const foot = document.createElement("div");
