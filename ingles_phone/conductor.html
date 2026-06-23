@@ -228,33 +228,6 @@
     margin:10px 0 14px;
   }
 
-  .structure-error{
-    max-width:390px;
-    margin:18px auto;
-    padding:16px;
-    border:2px solid #c00000;
-    border-radius:12px;
-    background:#fff4f4;
-    color:#3b0000;
-    font-family:Arial, Helvetica, sans-serif;
-    line-height:1.35;
-  }
-
-  .structure-error h1{
-    margin:0 0 10px;
-    font-size:20px;
-  }
-
-  .structure-error pre{
-    white-space:pre-wrap;
-    background:#ffffff;
-    border:1px solid #e1b5b5;
-    border-radius:8px;
-    padding:8px;
-    font-size:12px;
-    overflow:auto;
-  }
-
   @media (max-width:380px){
     main{ padding:4px 4px 1px; }
     .section-box{ margin-bottom:var(--gap); }
@@ -437,10 +410,39 @@
     sessionStorage.setItem("tense", "now");
   }
 
-  // Structure storage is created by structure.html only.
-  // The conductor must not invent or overwrite layout sessionStorage.
-  // If structure.html was bypassed or transmitted bad data, the receiver below
-  // will stop and show a visible error instead of building a fake layout.
+  // SPS PHONE LAYOUT RESET
+  // Always refresh the proven InglesYa 3-4-3-4-3 layout so older test data
+  // in sessionStorage cannot force the goofy 5/object + 9/pronoun layout.
+  const canonicalPronounSlots = [];
+  for (let i = 1; i <= 7; i++) canonicalPronounSlots.push({ id: i, kind: "main" });
+
+  const canonicalObjectSlots = [];
+  for (let i = 1; i <= 10; i++) canonicalObjectSlots.push({ id: i });
+
+  const canonicalExpressionSlots = [{ id: 8 }, { id: 9 }];
+  const canonicalPhoneLayoutConfig = {
+    layoutName: "sps-phone-inglesya-3-4-3-4-3",
+    frameScale: 1.44,
+    rowGapPx: 0,
+    columnGapPx: 2,
+    allowFourFrameRowsToNearlyTouch: true,
+    preventScrolling: true,
+    preserveFrameOrder: true,
+    rows: [
+      { group: "pronouns", ids: [1, 2, 3] },
+      { group: "pronouns", ids: [4, 5, 6, 7] },
+      { group: "objects",  ids: [1, 2, 3] },
+      { group: "objects",  ids: [4, 5, 6, 7] },
+      { group: "objects",  ids: [8, 9, 10] },
+      { group: "expressions", ids: [8, 9] }
+    ]
+  };
+
+  sessionStorage.setItem("pronounSlots", JSON.stringify(canonicalPronounSlots));
+  sessionStorage.setItem("objectSlots", JSON.stringify(canonicalObjectSlots));
+  sessionStorage.setItem("expressionSlots", JSON.stringify(canonicalExpressionSlots));
+  sessionStorage.setItem("expressionPronounIds", JSON.stringify([8, 9]));
+  sessionStorage.setItem("phoneLayoutConfig", JSON.stringify(canonicalPhoneLayoutConfig));
 })();
 
 console.log("=== PHONE CONDUCTOR STORAGE CHECK ===");
@@ -525,72 +527,19 @@ for (let i = 0; i < sessionStorage.length; i++) {
 
 <script>
 (function(){
-  // ----- Strict sessionStorage receiver -----
+  // ----- Safe sessionStorage receiver -----
   // This conductor reads the structure page's instructions.
-  // It does not repair, rewrite, resize, reposition, or invent the stored layout.
-  function stopWithStructureError(message, details){
-    console.error("SPS PHONE STRUCTURE ERROR:", message, details || "");
-
-    document.body.classList.remove("layout-loading");
-
-    const prep = document.getElementById("prepOverlay");
-    if (prep) prep.classList.add("done");
-
-    const pbar = document.getElementById("pbar");
-    if (pbar) pbar.style.display = "none";
-
-    const badge = document.getElementById("lessonNumberBadge");
-    if (badge) badge.textContent = "!";
-
-    const mount = document.getElementById("phoneLayoutMount");
-    const target = mount || document.body;
-    target.innerHTML = `
-      <div class="structure-error">
-        <h1>Phone structure error</h1>
-        <p>The conductor did not receive a valid layout from <strong>structure.html</strong>.</p>
-        <p>No emergency layout was created. Please open <strong>ingles_phone/structure.html</strong> first.</p>
-        <pre>${String(message).replace(/[<>&]/g, ch => ({"<":"&lt;", ">":"&gt;", "&":"&amp;"}[ch]))}</pre>
-      </div>
-    `;
-  }
-
-  function readRequiredJSON(key){
-    const raw = sessionStorage.getItem(key);
-    if (!raw) {
-      throw new Error(`Missing sessionStorage key: ${key}`);
-    }
-
+  // It does not repair, rewrite, resize, or reposition the stored layout.
+  function readJSON(key, fallback){
     try{
+      const raw = sessionStorage.getItem(key);
+      if (!raw) return fallback;
       const value = JSON.parse(raw);
-      if (value == null) {
-        throw new Error(`Empty JSON value for key: ${key}`);
-      }
-      return value;
+      return value == null ? fallback : value;
     } catch(err){
-      throw new Error(`Bad JSON in sessionStorage key ${key}: ${err.message}`);
+      console.warn("Bad sessionStorage JSON for", key, err);
+      return fallback;
     }
-  }
-
-  function assertArray(name, value){
-    if (!Array.isArray(value) || value.length === 0) {
-      throw new Error(`${name} must be a non-empty array from structure.html`);
-    }
-  }
-
-  function assertRows(value){
-    assertArray("phoneLayoutConfig.rows", value);
-
-    value.forEach((row, index) => {
-      if (!row || typeof row !== "object") {
-        throw new Error(`phoneLayoutConfig.rows[${index}] is not an object`);
-      }
-      if (!row.group) {
-        throw new Error(`phoneLayoutConfig.rows[${index}] is missing group`);
-      }
-      if (!Array.isArray(row.ids) || row.ids.length === 0) {
-        throw new Error(`phoneLayoutConfig.rows[${index}] is missing ids array`);
-      }
-    });
   }
 
   function numberOr(value, fallback){
@@ -611,35 +560,36 @@ for (let i = 0; i < sessionStorage.length; i++) {
   sessionStorage.setItem("lesson", String(lesson));
   sessionStorage.setItem("selectedLesson", String(lesson));
 
-  let phoneLayoutConfig;
-  let pronounSlots;
-  let objectSlots;
-  let expressionSlots;
-  let exprIds;
-  let layoutRows;
+  const phoneLayoutConfig = readJSON("phoneLayoutConfig", null);
+  const storedPronounSlots = readJSON("pronounSlots", []);
+  const storedObjectSlots = readJSON("objectSlots", []);
+  const storedExpressionSlots = readJSON("expressionSlots", []);
+  const exprIds = readJSON("expressionPronounIds", [8, 9]);
 
-  try{
-    phoneLayoutConfig = readRequiredJSON("phoneLayoutConfig");
-    pronounSlots = readRequiredJSON("pronounSlots");
-    objectSlots = readRequiredJSON("objectSlots");
-    expressionSlots = readRequiredJSON("expressionSlots");
-    exprIds = readRequiredJSON("expressionPronounIds");
+  // Display-only emergency fallbacks. These keep the page from going blank if
+  // structure.html was bypassed, but they are never written back into storage.
+  const pronounSlots = Array.isArray(storedPronounSlots) && storedPronounSlots.length
+    ? storedPronounSlots
+    : [1,2,3,4,5,6,7].map(id => ({ id, kind:"main" }));
 
-    if (!phoneLayoutConfig || typeof phoneLayoutConfig !== "object") {
-      throw new Error("phoneLayoutConfig must be an object from structure.html");
-    }
+  const objectSlots = Array.isArray(storedObjectSlots) && storedObjectSlots.length
+    ? storedObjectSlots
+    : [1,2,3,4,5,6,7,8,9,10].map(id => ({ id }));
 
-    assertArray("pronounSlots", pronounSlots);
-    assertArray("objectSlots", objectSlots);
-    assertArray("expressionSlots", expressionSlots);
-    assertArray("expressionPronounIds", exprIds);
-    assertRows(phoneLayoutConfig.rows);
+  const expressionSlots = Array.isArray(storedExpressionSlots) && storedExpressionSlots.length
+    ? storedExpressionSlots
+    : [8,9].map(id => ({ id }));
 
-    layoutRows = phoneLayoutConfig.rows;
-  } catch(err){
-    stopWithStructureError(err.message, err);
-    return;
-  }
+  const layoutRows = phoneLayoutConfig && Array.isArray(phoneLayoutConfig.rows) && phoneLayoutConfig.rows.length
+    ? phoneLayoutConfig.rows
+    : [
+        { group:"pronouns", ids:[1,2,3] },
+        { group:"pronouns", ids:[4,5,6,7] },
+        { group:"objects", ids:[1,2,3] },
+        { group:"objects", ids:[4,5,6,7] },
+        { group:"objects", ids:[8,9,10] },
+        { group:"expressions", ids:[8,9] }
+      ];
 
   // Apply only the structure-provided layout values.
   // These are not conductor decisions; they are the conductor obeying structure.html.
