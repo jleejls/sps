@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InglesYa</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 12px;
+      min-height: 100vh;
+      background-color: #57ecf6;
+      color: #333;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    #container {
+      margin-top: 70px;
+      background-color: tan;
+      border-radius: 10px;
+      width: min(220px, 92vw);
+      padding: 1rem;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .section {
+      margin: 1rem 0;
+      padding: 1rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .section h2 {
+      font-size: 1.15rem;
+      margin: 0.35rem 0 0.7rem;
+    }
+
+    button {
+      background-color: #007acc;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #005fa3;
+    }
+
+    @media (max-width: 700px) {
+      #container {
+        margin-top: 32px;
+      }
+
+      .section {
+        margin: 0.75rem 0;
+        padding: 0.75rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container">
+    <div class="section">
+      <h2>Vuelve a estudiar</h2>
+      <button onclick="goToCorrectLane()">Comience</button>
+    </div>
+
+    <div class="section">
+      <h2>Primera vez aqui</h2>
+      <button onclick="location.href='./welcome.html'">Desde el principio</button>
+    </div>
+
+    <div class="section">
+      <h2>Vuelva Pronto</h2>
+      <button onclick="window.location.href='quit.html';">Salir</button>
+    </div>
+  </div>
+
+  <script>
+    function goToCorrectLane() {
+      if (window.innerWidth < 700) {
+        window.location.href = "ingles_phone/structure.html?v=jpg-stage-20260623";
+      } else {
+        window.location.href = "ingles_desktop/structure.html?v=jpg-stage-20260623";
+      }
+    }
+  </script>
+</body>
+</html>
