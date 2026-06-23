@@ -455,15 +455,20 @@ for (let i = 0; i < sessionStorage.length; i++) {
   // 1) old split folders: pronouns/images, objects/images, pronouns/audios, objects/audios
   // 2) newer single folders: image and sound
   const pronImg = i => [
-    // Final JPG-only image paths.
+    // Try JPG first for reduced-size images, then fall back to PNG.
     `${basePath}/pronouns/images/p${i}.jpg`,
+    `${basePath}/pronouns/images/p${i}.png`,
     `${basePath}/image/p${i + 10}.jpg`,
-    `${basePath}/image/p${i}.jpg`
+    `${basePath}/image/p${i + 10}.png`,
+    `${basePath}/image/p${i}.jpg`,
+    `${basePath}/image/p${i}.png`
   ];
   const objImg  = i => [
-    // Final JPG-only image paths.
+    // Try JPG first for reduced-size images, then fall back to PNG.
     `${basePath}/objects/images/p${i}.jpg`,
-    `${basePath}/image/p${i}.jpg`
+    `${basePath}/objects/images/p${i}.png`,
+    `${basePath}/image/p${i}.jpg`,
+    `${basePath}/image/p${i}.png`
   ];
   const pronAud = i => [
     `${basePath}/pronouns/audios/a${i}.m4a`,
@@ -502,7 +507,7 @@ for (let i = 0; i < sessionStorage.length; i++) {
   // ----- Build pronoun tiles (3×3 grid, ids 1..9) -----
   const pronMount = document.getElementById("pronouns");
   pronounSlots.forEach(slot => {
-    const t = makeTile(pronImg(slot.id), `p${slot.id}.jpg`);
+    const t = makeTile(pronImg(slot.id), `p${slot.id}.jpg / p${slot.id}.png`);
     t.dataset.group = "pronouns";
     t.dataset.index = slot.id;
     t.dataset.kind  = slot.kind || "main"; // "main" or "expression"
@@ -514,7 +519,7 @@ for (let i = 0; i < sessionStorage.length; i++) {
   const rightCol = document.getElementById("objRight");
 
   objectSlots.forEach(slot => {
-    const t = makeTile(objImg(slot.id), `p${slot.id}.jpg`);
+    const t = makeTile(objImg(slot.id), `p${slot.id}.jpg / p${slot.id}.png`);
     t.dataset.group = "objects";
     t.dataset.index = slot.id;
 

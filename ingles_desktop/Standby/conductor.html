@@ -247,65 +247,6 @@
       padding-bottom:80px;
     }
   }
-
-  /* Right-click image magnifier */
-  .magnify-overlay{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.55);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:300;
-    padding:24px;
-  }
-
-  .magnify-overlay[hidden]{
-    display:none;
-  }
-
-  .magnify-frame{
-    position:relative;
-    background:#ffffff;
-    border-radius:14px;
-    border:3px solid #ffffff;
-    width:min(82vw,660px);
-    height:min(82vh,660px);
-    overflow:hidden;
-    box-shadow:0 12px 35px rgba(0,0,0,.45);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  }
-
-  .magnify-frame img{
-    width:100%;
-    height:100%;
-    object-fit:contain;
-    display:block;
-    transform:scale(1.1);
-    transform-origin:center center;
-  }
-
-  .magnify-close{
-    position:absolute;
-    top:8px;
-    right:8px;
-    width:34px;
-    height:34px;
-    border-radius:50%;
-    border:2px solid #ffffff;
-    background:#c00000;
-    color:#ffffff;
-    font:bold 23px/28px Arial, sans-serif;
-    cursor:pointer;
-    z-index:2;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    box-shadow:0 2px 8px rgba(0,0,0,.35);
-  }
-
 </style>
 <script>
 // ----- Conductor startup -----
@@ -410,14 +351,6 @@ for (let i = 0; i < sessionStorage.length; i++) {
 </div>
 <audio id="player" preload="auto"></audio>
 
-<div id="magnifyOverlay" class="magnify-overlay" hidden>
-  <div class="magnify-frame">
-    <button id="magnifyClose" class="magnify-close" type="button" aria-label="Close magnified image">×</button>
-    <img id="magnifyImage" alt="Magnified image">
-  </div>
-</div>
-
-
 <script>
 (function(){
   // ----- Layout + selection data from sessionStorage -----
@@ -455,15 +388,13 @@ for (let i = 0; i < sessionStorage.length; i++) {
   // 1) old split folders: pronouns/images, objects/images, pronouns/audios, objects/audios
   // 2) newer single folders: image and sound
   const pronImg = i => [
-    // Final JPG-only image paths.
-    `${basePath}/pronouns/images/p${i}.jpg`,
-    `${basePath}/image/p${i + 10}.jpg`,
-    `${basePath}/image/p${i}.jpg`
+    `${basePath}/pronouns/images/p${i}.png`,
+    `${basePath}/image/p${i + 10}.png`,
+    `${basePath}/image/p${i}.png`
   ];
   const objImg  = i => [
-    // Final JPG-only image paths.
-    `${basePath}/objects/images/p${i}.jpg`,
-    `${basePath}/image/p${i}.jpg`
+    `${basePath}/objects/images/p${i}.png`,
+    `${basePath}/image/p${i}.png`
   ];
   const pronAud = i => [
     `${basePath}/pronouns/audios/a${i}.m4a`,
@@ -502,7 +433,7 @@ for (let i = 0; i < sessionStorage.length; i++) {
   // ----- Build pronoun tiles (3×3 grid, ids 1..9) -----
   const pronMount = document.getElementById("pronouns");
   pronounSlots.forEach(slot => {
-    const t = makeTile(pronImg(slot.id), `p${slot.id}.jpg`);
+    const t = makeTile(pronImg(slot.id), `p${slot.id}.png`);
     t.dataset.group = "pronouns";
     t.dataset.index = slot.id;
     t.dataset.kind  = slot.kind || "main"; // "main" or "expression"
@@ -514,7 +445,7 @@ for (let i = 0; i < sessionStorage.length; i++) {
   const rightCol = document.getElementById("objRight");
 
   objectSlots.forEach(slot => {
-    const t = makeTile(objImg(slot.id), `p${slot.id}.jpg`);
+    const t = makeTile(objImg(slot.id), `p${slot.id}.png`);
     t.dataset.group = "objects";
     t.dataset.index = slot.id;
 
@@ -638,49 +569,6 @@ function closeContactOverlay(){
   const overlay = document.getElementById("contactOverlay");
   if (overlay) overlay.hidden = true;
 }
-</script>
-
-
-<script>
-// ----- Right-click magnifier for lesson images -----
-(function(){
-  const overlay = document.getElementById("magnifyOverlay");
-  const magnifyImage = document.getElementById("magnifyImage");
-  const closeButton = document.getElementById("magnifyClose");
-
-  if (!overlay || !magnifyImage || !closeButton) return;
-
-  document.addEventListener("contextmenu", ev => {
-    const img = ev.target.closest(".tile img");
-    if (!img) return;
-
-    ev.preventDefault();
-    ev.stopPropagation();
-
-    magnifyImage.src = img.currentSrc || img.src;
-    magnifyImage.alt = img.alt || "Magnified image";
-    overlay.hidden = false;
-  });
-
-  closeButton.addEventListener("click", ev => {
-    ev.preventDefault();
-    ev.stopPropagation();
-    overlay.hidden = true;
-    magnifyImage.removeAttribute("src");
-  });
-
-  // Keep accidental clicks outside the picture from closing it.
-  overlay.addEventListener("click", ev => {
-    ev.stopPropagation();
-  });
-
-  document.addEventListener("keydown", ev => {
-    if (ev.key === "Escape" && !overlay.hidden) {
-      overlay.hidden = true;
-      magnifyImage.removeAttribute("src");
-    }
-  });
-})();
 </script>
 
 <script>
