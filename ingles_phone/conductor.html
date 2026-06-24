@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Conductor</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+   :root{
+    --trigger-size: 54px;
+    --trigger-gap: 8px;
+    --trigger-pad-y: 8px;
+    --trigger-pad-x: 10px;
+    --trigger-bar-height: calc(var(--trigger-size) + (var(--trigger-pad-y) * 2));
+  }
+  *{ box-sizing:border-box; }
+  html, body{
+    margin:0;
+    width:100%;
+    height:100%;
+    background:#ffffff;
+    overflow:auto;
+    font-family:Arial, Helvetica, sans-serif;
+  }
+  body{
+    margin:0;
+    font-family:system-ui,Segoe UI,Roboto,Arial;
+    background:#ffffff;
+    color:#222;
+  }
+  header{
+    display:none;
+  }
+  main{
+    max-width:1140px;
+    margin:0 auto;
+    padding:46px 12px 64px;
+  }
+
+  h3{
+    display:none;
+  }
+
+  .lesson-number-badge{
+    position:fixed;
+    top:10px;
+    right:12px;
+    z-index:70;
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    background:#fffbea;
+    border:2px solid #8a6a25;
+    color:#3b3020;
+    box-shadow:0 2px 8px rgba(0,0,0,.18);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font:bold 18px Arial, Helvetica, sans-serif;
+    pointer-events:none;
+  }
+
+  /* Phone station stage: row counts come from structure.html stationStorage.
+     8 narrow grid tracks let 3-frame rows center above 4-frame rows. */
+  main{
+    max-width:560px;
+    margin:0 auto;
+    padding:14px 8px calc(var(--trigger-bar-height) + 18px);
+  }
+
+  .station-grid{
+    display:grid;
+    grid-template-columns:repeat(8, minmax(0, 1fr));
+    gap:5px;
+    width:min(100%,520px);
+    margin:0 auto;
+    align-items:center;
+  }
+
+  .station-error{
+    width:min(92vw,520px);
+    margin:40px auto;
+    padding:18px;
+    border:2px solid #b00020;
+    border-radius:12px;
+    background:#fff4f4;
+    color:#4d0000;
+    font:16px/1.35 Arial, Helvetica, sans-serif;
+    text-align:center;
+  }
+
+  .tile{
+    position:relative;
+    border:1px solid #d7dbe3;
+    border-radius:8px;
+    overflow:hidden;
+    cursor:pointer;
+    background:#f9fafb;
+    aspect-ratio:1/1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .tile[data-shape="circle"]{
+    border-radius:50%;
+    overflow:hidden;
+  }
+
+  .tile[data-shape="circle"] img{
+    border-radius:50%;
+    width:82%;
+    height:82%;
+  }
+
+  .tile[data-shape="circle"].speaking{
+    outline:4px solid #c00000;
+    outline-offset:3px;
+    box-shadow:0 0 0 5px rgba(192,0,0,.16), 0 2px 8px rgba(0,0,0,.18);
+  }
+
+  .tile[data-group="objects"] img{
+    width:92%;
+    height:92%;
+    object-fit:contain;
+    display:block;
+  }
+
+  .tile[data-group="pronouns"] img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:block;
+  }
+
+
+  .label{
+    font:11px/1.2 monospace;
+    color:#555;
+    text-align:center;
+    padding:4px;
+    white-space:pre-line;
+  }
+
+
+
+  /* Bottom image buttons copied from the button-study essence */
+  .zipbutton{
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+    justify-content:center;
+    gap:2vh;
+    position:fixed;
+    bottom:2vh;
+    left:50%;
+    transform:translateX(-50%);
+    background-color:#f0f0f0;
+    padding:6px 10px;
+    border-radius:10px;
+    border:1px solid #ddd;
+    z-index:50;
+  }
+
+  .buttonz{
+    border:2px solid #4CAF50;
+    border-radius:1vw;
+    height:5vh;
+    width:5vw;
+    min-width:56px;
+    min-height:36px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:14px;
+    background-color:#d05000;
+    cursor:pointer;
+  }
+
+  .buttonz img{
+    max-width:100%;
+    max-height:100%;
+    display:block;
+    pointer-events:none;
+  }
+
+
+  /* Email contact overlay: stays invisible until the email button opens it */
+  .contact-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.45);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:200;
+    padding:20px;
+  }
+
+  .contact-overlay[hidden]{
+    display:none;
+  }
+
+  .contact-box{
+    background:white;
+    color:black;
+    padding:25px;
+    border-radius:12px;
+    max-width:430px;
+    text-align:center;
+    font-family:Arial, sans-serif;
+    box-shadow:0 8px 25px rgba(0,0,0,.25);
+  }
+
+  .contact-box a,
+  .contact-box button{
+    display:inline-block;
+    margin:6px;
+    padding:9px 13px;
+    border-radius:8px;
+    border:1px solid #777;
+    background:#f4f4f4;
+    color:#111;
+    text-decoration:none;
+    font:14px Arial, sans-serif;
+    cursor:pointer;
+  }
+
+  .contact-address{
+    font-weight:bold;
+    margin:10px 0 14px;
+  }
+
+  /* Small debug badge */
+  .foot{
+    display:none;
+  }
+
+  @media (max-width:600px){
+    main{
+      padding-bottom:80px;
+    }
+  }
+
+
+  /* Lesson preparation pause overlay lives in conductor.html only. */
+  .prep-overlay{
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(255,247,223,0.94);
+    padding:20px;
+  }
+
+  .prep-overlay.done{
+    display:none;
+  }
+
+  .prep-card{
+    width:min(90vw,430px);
+    background:#ffffff;
+    border:1px solid #d7c88a;
+    border-radius:16px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.22);
+    text-align:center;
+    padding:24px 18px;
+  }
+
+  .prep-spinner{
+    width:38px;
+    height:38px;
+    border:5px solid #ddd;
+    border-top-color:#007acc;
+    border-radius:50%;
+    margin:0 auto 14px;
+    animation:prepSpin 0.85s linear infinite;
+  }
+
+  @keyframes prepSpin{
+    to{ transform:rotate(360deg); }
+  }
+
+  .prep-message{
+    font-size:18px;
+    font-weight:700;
+    margin:0;
+    color:#3b3020;
+  }
+
+  .prep-credit{
+    font-size:13px;
+    margin:10px 0 0;
+    color:#665536;
+  }
+
+  .prep-credits{
+    margin:14px auto 0;
+    padding-top:12px;
+    border-top:1px solid #e4d8aa;
+    text-align:left;
+  }
+
+  .prep-credits h2{
+    margin:0 0 8px;
+    text-align:center;
+    font-size:1rem;
+    color:#3b3020;
+  }
+
+  .prep-credits ul{
+    list-style:none;
+    padding:0;
+    margin:0;
+    font-size:0.84rem;
+    line-height:1.35;
+    color:#4d402b;
+  }
+
+  @media (max-width:700px){
+    .prep-card{ padding:20px 15px; }
+    .prep-credits ul{
+      font-size:0.78rem;
+      line-height:1.25;
+    }
+  }
+
+
+  /* Right-click image magnifier */
+  .image-magnifier-overlay{
+    position:fixed;
+    inset:0;
+    z-index:10000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,0.72);
+    padding:36px;
+  }
+
+  .image-magnifier-overlay[hidden]{
+    display:none;
+  }
+
+  .image-magnifier-frame{
+    position:relative;
+    max-width:96vw;
+    max-height:96vh;
+    overflow:auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+
+  .image-magnifier-frame img{
+    display:block;
+    max-width:88vw;
+    max-height:88vh;
+    object-fit:contain;
+    transform:scale(1.15);
+    transform-origin:center center;
+  }
+
+  .image-magnifier-close{
+    position:absolute;
+    top:8px;
+    right:8px;
+    z-index:10001;
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    border:3px solid #ffffff;
+    background:#d00000;
+    color:#ffffff;
+    font:bold 26px/1 Arial, Helvetica, sans-serif;
+    cursor:pointer;
+    box-shadow:0 2px 10px rgba(0,0,0,0.35);
+  }
+
+  .image-magnifier-close:hover{
+    background:#ff0000;
+  }
+
+
+  /* Phone station layout: 3-4-3-4-3 + 2 circles from stationStorage. */
+  @media (max-width:700px){
+    html, body{
+      overflow-x:hidden;
+    }
+
+    main{
+      max-width:100vw;
+      padding:8px 6px calc(var(--trigger-bar-height) + 18px);
+    }
+
+    .lesson-number-badge{
+      top:5px;
+      right:6px;
+      width:30px;
+      height:30px;
+      font-size:14px;
+      z-index:80;
+    }
+
+    .station-grid{
+      width:100%;
+      max-width:520px;
+      gap:4px;
+    }
+
+    .tile{
+      width:100%;
+      min-height:0;
+      aspect-ratio:1/1;
+      border-radius:7px;
+    }
+
+    .tile[data-shape="circle"]{
+      border-radius:50%;
+    }
+
+    .tile[data-shape="circle"] img{
+      border-radius:50%;
+      width:82%;
+      height:82%;
+    }
+
+    .zipbutton{
+      bottom:5px;
+      width:calc(100vw - 8px);
+      max-width:520px;
+      gap:3px;
+      padding:4px;
+      justify-content:space-between;
+    }
+
+    .buttonz{
+      width:11.5vw;
+      height:42px;
+      min-width:36px;
+      min-height:34px;
+      border-radius:8px;
+    }
+  }
+
+
+</style>
+<script>
+// ----- Conductor startup -----
+// Accept the lesson number no matter which earlier page stored it.
+(function () {
+  const urlLesson = new URLSearchParams(window.location.search).get("lesson");
+  const storedLesson =
+    urlLesson ||
+    sessionStorage.getItem("selectedLesson") ||
+    sessionStorage.getItem("lesson") ||
+    sessionStorage.getItem("currentLesson") ||
+    "1";
+
+  const cleanLesson = Number(storedLesson);
+  const lessonToUse = Number.isFinite(cleanLesson) && cleanLesson > 0 ? String(cleanLesson) : "1";
+
+  sessionStorage.setItem("lesson", lessonToUse);
+  sessionStorage.setItem("selectedLesson", lessonToUse);
+
+  if (!sessionStorage.getItem("tense")) {
+    sessionStorage.setItem("tense", "now");
+  }
+})();
+
+const lesson = sessionStorage.getItem("lesson") || "1";
+const tense  = sessionStorage.getItem("tense")  || "now";
+
+console.log("=== CONDUCTOR STORAGE CHECK ===");
+
+for (let i = 0; i < sessionStorage.length; i++) {
+  const key = sessionStorage.key(i);
+  console.log(key, "=", sessionStorage.getItem(key));
+}
+</script>
+</head>
+<body>
+
+
+<div id="imageMagnifierOverlay" class="image-magnifier-overlay" hidden aria-label="Magnified image viewer">
+  <div class="image-magnifier-frame">
+    <button id="imageMagnifierClose" class="image-magnifier-close" type="button" aria-label="Close magnified image">×</button>
+    <img id="imageMagnifierImage" alt="Magnified image">
+  </div>
+</div>
+
+
+<div id="prepOverlay" class="prep-overlay" aria-live="polite" aria-label="Lesson preparation message">
+  <div class="prep-card">
+    <div class="prep-spinner" aria-hidden="true"></div>
+    <p class="prep-message">Your lesson is being prepared...</p>
+    <p class="prep-credit">Created by Jimmy Self</p>
+
+    <div class="prep-credits" aria-label="Credits">
+      <h2>Créditos</h2>
+      <ul>
+        <li><strong>Creador del proyecto:</strong> Jimmy Self</li>
+        <li><strong>Ayudante:</strong> AJ Cornell</li>
+        <li><strong>Diseño y Arte:</strong> José García</li>
+        <li><strong>Visuales:</strong> María Flores</li>
+        <li><strong>Audio:</strong> Jimmy Self</li>
+        <li><strong>Asesor de producción:</strong> Prof. Eduardo De León</li>
+        <li><strong>Actores:</strong> A.J. Cornell, Rachel Cornell</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<div id="lessonBadge" class="lesson-number-badge" aria-label="Lesson number"></div>
+
+<header id="banner">Director</header>
+
+<main>
+  <div id="stationGrid" class="station-grid" aria-label="Phone learning stations"></div>
+</main>
+
+<div id="pbar" class="zipbutton" aria-label="Program buttons">
+  <div class="buttonz" data-btn="continue" title="Advance to next page">
+    <img src="../trigger/adelante.png" alt="Advance">
+  </div>
+  <div class="buttonz" data-btn="exit" title="Exit" onclick="window.location.assign('../quit.html');">
+    <img src="../trigger/exit.png" alt="Exit">
+  </div>
+  <div class="buttonz" data-btn="choosel" title="Choose lesson">
+    <img src="../trigger/choosel.png" alt="Choose lesson">
+  </div>
+  <div class="buttonz" data-btn="help" title="Help / guidelines">
+    <img src="../trigger/help.png" alt="Help">
+  </div>
+  <div class="buttonz" data-btn="donate" title="Donate">
+    <img src="../trigger/donate.png" alt="Donate">
+  </div>
+    <div class="buttonz" data-btn="email" title="Contact Jimmy Lucky">
+    <img src="../trigger/email.png" alt="Email">
+  </div>
+  <!-- Button 7: La Gente - use the same clean desktop return pattern as Plática V2 -->
+  <div class="buttonz" data-btn="goback" title="La Gente">
+    <img src="../trigger/lagente.png" alt="La Gente">
+  </div>
+  <div class="buttonz" data-btn="translate" title="Translation">
+    <img src="../trigger/translate.png" alt="Translate">
+  </div>
+</div>
+
+<div id="contactOverlay" class="contact-overlay" hidden>
+  <div class="contact-box">
+    <h2>Email Contact</h2>
+    <p>Please send your message to:</p>
+    <p class="contact-address">spanishsoundbites@gmail.com</p>
+    <button type="button" onclick="closeContactOverlay()">Close</button>
+  </div>
+</div>
+<audio id="player" preload="auto"></audio>
+
+<script>
+(function(){
+  // ----- Layout comes only from stationStorage written by structure.html -----
+  const stationStorageRaw = sessionStorage.getItem("stationStorage");
+  let stationStorage = null;
+
+  function showStationStorageError(message){
+    const main = document.querySelector("main");
+    if (main) {
+      main.innerHTML = `<div class="station-error"><strong>Structure error</strong><br>${message}<br><br>Open <strong>structure.html</strong> first so it can place the phone stations into session storage.</div>`;
+    }
+    throw new Error(message);
+  }
+
+  if (!stationStorageRaw) {
+    showStationStorageError("No stationStorage information reached conductor.html.");
+  }
+
+  try {
+    stationStorage = JSON.parse(stationStorageRaw);
+  } catch (err) {
+    showStationStorageError("stationStorage exists, but it is not valid JSON.");
+  }
+
+  if (!stationStorage || !Array.isArray(stationStorage.stations) || !stationStorage.stations.length) {
+    showStationStorageError("stationStorage does not contain a usable stations list.");
+  }
+
+  const exprIds = Array.isArray(stationStorage.expressionPronounIds)
+    ? stationStorage.expressionPronounIds.map(Number)
+    : [];
+
+  const tense  = sessionStorage.getItem("tense")  || "now";
+  let lesson = Number(
+    sessionStorage.getItem("lesson") ||
+    sessionStorage.getItem("selectedLesson") ||
+    sessionStorage.getItem("currentLesson") ||
+    "1"
+  );
+  if (!lesson || Number.isNaN(lesson)) lesson = 1;
+  sessionStorage.setItem("lesson", String(lesson));
+  sessionStorage.setItem("selectedLesson", String(lesson));
+
+  const basePath = `../group/lesson${lesson}`;
+  document.getElementById("banner").textContent = "";
+  const lessonBadge = document.getElementById("lessonBadge");
+  if (lessonBadge) lessonBadge.textContent = String(lesson);
+
+  // ----- Paths -----
+  // Stage/JPG version:
+  // Prefer the new split JPG lesson images first. Keep PNG and old single-folder
+  // fallbacks so older backups can still run if they are opened by mistake.
+  // The small cache tag helps phones stop showing stale cached pictures.
+  const ASSET_VERSION = "jpg-stage-20260623";
+  const imgPath = path => `${path}?v=${ASSET_VERSION}`;
+
+  const pronImg = i => [
+    imgPath(`${basePath}/pronouns/images/p${i}.jpg`),
+    imgPath(`${basePath}/pronouns/images/p${i}.jpeg`),
+    imgPath(`${basePath}/pronouns/images/p${i}.png`),
+    imgPath(`${basePath}/image/p${i + 10}.jpg`),
+    imgPath(`${basePath}/image/p${i + 10}.jpeg`),
+    imgPath(`${basePath}/image/p${i + 10}.png`),
+    imgPath(`${basePath}/image/p${i}.jpg`),
+    imgPath(`${basePath}/image/p${i}.jpeg`),
+    imgPath(`${basePath}/image/p${i}.png`)
+  ];
+  const objImg  = i => [
+    imgPath(`${basePath}/objects/images/p${i}.jpg`),
+    imgPath(`${basePath}/objects/images/p${i}.jpeg`),
+    imgPath(`${basePath}/objects/images/p${i}.png`),
+    imgPath(`${basePath}/image/p${i}.jpg`),
+    imgPath(`${basePath}/image/p${i}.jpeg`),
+    imgPath(`${basePath}/image/p${i}.png`)
+  ];
+  const pronAud = i => [
+    `${basePath}/pronouns/audios/a${i}.m4a`,
+    `${basePath}/sound/${i + 10}.m4a`,
+    `${basePath}/sound/${i}.m4a`
+  ];
+  const objAud  = i => [
+    `${basePath}/objects/audios/a${i}.m4a`,
+    `${basePath}/sound/${i}.m4a`
+  ];
+
+
+  // ----- Conversation-circle audio paths -----
+  // Francisco uses expression pronoun P8, Rachel uses expression pronoun P9.
+  // These IDs are read from the structure station storage.
+  const FRANCISCO_EXPRESSION_ID = exprIds[0] || 8;
+  const RACHEL_EXPRESSION_ID = exprIds[1] || 9;
+
+  function conversationAud(speaker, role, number){
+    const shortSpeaker = speaker === "francisco" ? "f" : "r";
+    const shortRole = role === "statement" ? "s" : "reply";
+
+    return [
+      `${basePath}/conversation/${speaker}_${role}_${number}.m4a`,
+      `${basePath}/conversation/${speaker}-${role}-${number}.m4a`,
+      `${basePath}/conversation/${shortSpeaker}_${shortRole}_${number}.m4a`,
+      `${basePath}/conversation/${shortSpeaker}${shortRole}${number}.m4a`,
+      `${basePath}/conversation/${speaker}${number}.m4a`,
+      `${basePath}/conversation/${shortSpeaker}${number}.m4a`
+    ];
+  }
+
+  function buildConversationItems(){
+    const items = [];
+
+    for (let i = 1; i <= 15; i++) {
+      items.push({ speakerId: FRANCISCO_EXPRESSION_ID, sources: conversationAud("francisco", "statement", i) });
+      items.push({ speakerId: RACHEL_EXPRESSION_ID, sources: conversationAud("rachel", "reply", i) });
+    }
+
+    for (let i = 1; i <= 15; i++) {
+      items.push({ speakerId: RACHEL_EXPRESSION_ID, sources: conversationAud("rachel", "statement", i) });
+      items.push({ speakerId: FRANCISCO_EXPRESSION_ID, sources: conversationAud("francisco", "reply", i) });
+    }
+
+    return items;
+  }
+
+  // ----- Tile builder -----
+  function makeTile(srcList, fallbackLabel, station){
+    const sources = Array.isArray(srcList) ? srcList : [srcList];
+    let srcIndex = 0;
+
+    const d = document.createElement("div");
+    d.className = "tile";
+    d.dataset.group = station.group;
+    d.dataset.index = String(station.id);
+    d.dataset.station = station.station || "";
+    d.dataset.shape = station.shape || "rectangle";
+    d.dataset.kind = station.kind || "";
+    d.style.gridRow = String(station.row);
+    d.style.gridColumn = station.gridColumn;
+
+    const img = document.createElement("img");
+    img.alt = fallbackLabel;
+
+    img.onerror = () => {
+      srcIndex += 1;
+      if (srcIndex < sources.length) {
+        img.src = sources[srcIndex];
+      } else {
+        d.innerHTML = `<div class="label">missing:\n${fallbackLabel}</div>`;
+      }
+    };
+
+    img.src = sources[srcIndex];
+    d.appendChild(img);
+    return d;
+  }
+
+  // ----- Build tiles exactly from stationStorage -----
+  const stationGrid = document.getElementById("stationGrid");
+  const expressionTilesByIndex = {};
+
+  stationStorage.stations.forEach(station => {
+    if (!station || !station.group || !station.id || !station.row || !station.gridColumn) {
+      showStationStorageError("A station entry is incomplete.");
+    }
+
+    const src = station.group === "pronouns" ? pronImg(Number(station.id)) : objImg(Number(station.id));
+    const prefix = station.group === "pronouns" ? "p" : "p";
+    const tile = makeTile(src, `${prefix}${station.id}.jpg`, station);
+
+    if (station.group === "pronouns" && isExpressionPronoun(Number(station.id))) {
+      expressionTilesByIndex[Number(station.id)] = tile;
+    }
+
+    stationGrid.appendChild(tile);
+  });
+
+  // ----- Audio logic: no overlaps, serial uniting -----
+  const player = document.getElementById("player");
+  let lastPronSrc = null;
+  let lastPronJoinable = false;
+  let playToken = 0;
+
+  function isExpressionPronoun(index){
+    // A8 and A9 are expression audios.
+    // They must always play alone and must never be saved for joining with objects.
+    return index === 8 || index === 9 || exprIds.includes(index);
+  }
+
+  function playSequence(sources){
+    clearExpressionHighlights();
+    playToken++;
+    const myToken = playToken;
+    let i = 0;
+
+    function playOne(srcList){
+      const choices = Array.isArray(srcList) ? srcList : [srcList];
+      let choiceIndex = 0;
+
+      function tryChoice(){
+        if (myToken !== playToken) return;
+        if (choiceIndex >= choices.length) {
+          next();
+          return;
+        }
+
+        const src = choices[choiceIndex++];
+        player.onerror = tryChoice;
+        player.src = src;
+        player.currentTime = 0;
+        player.play().catch(err => {
+          console.log("play failed:", err);
+        });
+      }
+
+      tryChoice();
+    }
+
+    function next(){
+      if (myToken !== playToken) return;
+      if (i >= sources.length) return;
+      playOne(sources[i++]);
+    }
+
+    player.onended = () => {
+      if (myToken !== playToken) return;
+      next();
+    };
+
+    next();
+  }
+
+
+  function clearExpressionHighlights(){
+    Object.values(expressionTilesByIndex).forEach(tile => tile.classList.remove("speaking"));
+  }
+
+  function markExpressionSpeaker(speakerId){
+    clearExpressionHighlights();
+    const tile = expressionTilesByIndex[speakerId];
+    if (tile) tile.classList.add("speaking");
+  }
+
+  // Conversation stepping: one click plays one two-part exchange, then stops.
+  // The exchanges are shuffled, so the student does not hear 1,2,3,4 every time.
+  // After every exchange in the active set has been used once, the shuffle bag refills
+  // and a new random round begins automatically.
+  //
+  // For the current Lesson 1 trial, this is set to false because you have
+  // Francisco statements + Rachel replies prepared.
+  // Later, after Rachel statements + Francisco replies are recorded, change this to true.
+  const USE_RACHEL_STATEMENT_ROUND = false;
+
+  let conversationShuffleBag = [];
+
+  function buildConversationPairs(){
+    const pairs = [];
+
+    // Francisco asks / Rachel replies: 15 two-part exchanges.
+    for (let i = 1; i <= 15; i++) {
+      pairs.push([
+        { speakerId: FRANCISCO_EXPRESSION_ID, sources: conversationAud("francisco", "statement", i) },
+        { speakerId: RACHEL_EXPRESSION_ID, sources: conversationAud("rachel", "reply", i) }
+      ]);
+    }
+
+    // Rachel asks / Francisco replies: second 15 exchanges.
+    // Turn this on after those 30 additional audio files exist.
+    if (USE_RACHEL_STATEMENT_ROUND) {
+      for (let i = 1; i <= 15; i++) {
+        pairs.push([
+          { speakerId: RACHEL_EXPRESSION_ID, sources: conversationAud("rachel", "statement", i) },
+          { speakerId: FRANCISCO_EXPRESSION_ID, sources: conversationAud("francisco", "reply", i) }
+        ]);
+      }
+    }
+
+    return pairs;
+  }
+
+  function shuffleArray(items){
+    for (let i = items.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const temp = items[i];
+      items[i] = items[j];
+      items[j] = temp;
+    }
+    return items;
+  }
+
+  function refillConversationShuffleBag(){
+    conversationShuffleBag = shuffleArray(buildConversationPairs());
+  }
+
+  function playRandomConversationPair(){
+    if (!conversationShuffleBag.length) {
+      refillConversationShuffleBag();
+    }
+
+    if (!conversationShuffleBag.length) return;
+
+    const pairItems = conversationShuffleBag.shift();
+    playConversationPairOnly(pairItems);
+  }
+
+  function playConversationPairOnly(items){
+    playToken++;
+    const myToken = playToken;
+    let i = 0;
+
+    try { player.pause(); } catch(e) {}
+    player.onended = null;
+    player.onerror = null;
+
+    function stopPair(){
+      if (myToken !== playToken) return;
+      player.onended = null;
+      player.onerror = null;
+      clearExpressionHighlights();
+    }
+
+    function playOne(item){
+      const choices = Array.isArray(item.sources) ? item.sources : [item.sources];
+      let choiceIndex = 0;
+      markExpressionSpeaker(item.speakerId);
+
+      function tryChoice(){
+        if (myToken !== playToken) return;
+        if (choiceIndex >= choices.length) {
+          next();
+          return;
+        }
+
+        const src = choices[choiceIndex++];
+        player.onerror = tryChoice;
+        player.src = src;
+        player.currentTime = 0;
+        player.play().catch(err => {
+          console.log("conversation play failed:", err);
+          tryChoice();
+        });
+      }
+
+      tryChoice();
+    }
+
+    function next(){
+      if (myToken !== playToken) return;
+      if (i >= items.length) {
+        stopPair();
+        return;
+      }
+      playOne(items[i++]);
+    }
+
+    player.onended = () => {
+      if (myToken !== playToken) return;
+      next();
+    };
+
+    next();
+  }
+
+  // ----- Click handling -----
+  document.addEventListener("click", ev => {
+    const el = ev.target.closest(".tile[data-group][data-index]");
+    if (!el) return;
+
+    const group = el.dataset.group;
+    const index = Number(el.dataset.index);
+
+    if (group === "pronouns") {
+      const src = pronAud(index);
+
+      if (isExpressionPronoun(index)) {
+        lastPronSrc = null;
+        lastPronJoinable = false;
+        playRandomConversationPair();
+      } else {
+        lastPronSrc = src;
+        lastPronJoinable = true;
+        playSequence([src]);
+      }
+      return;
+    }
+
+if (group === "objects") {
+  const srcObj = objAud(index);
+
+  if (lastPronSrc && lastPronJoinable) {
+    // First click after a pronoun: play united phrase
+    playSequence([lastPronSrc, srcObj]);
+
+    // Then clear the saved pronoun so the NEXT object click is simple
+    lastPronSrc = null;
+    lastPronJoinable = false;
+  } else {
+    // No active pronoun: play only the object audio
+    playSequence([srcObj]);
+  }
+  return;
+}
+  
+  });
+
+})();
+</script>
+
+<script>
+function openContactOverlay(){
+  const overlay = document.getElementById("contactOverlay");
+  if (overlay) overlay.hidden = false;
+}
+
+function closeContactOverlay(){
+  const overlay = document.getElementById("contactOverlay");
+  if (overlay) overlay.hidden = true;
+}
+</script>
+
+<script>
+// ----- Bottom image-button actions -----
+// This is the working button-study idea, now connected to real conductor actions.
+(function(){
+  const pbar = document.getElementById("pbar");
+  if (!pbar) return;
+
+  function goTo(page){
+    window.location.href = page;
+  }
+
+  function currentLesson(){
+    const n = Number(sessionStorage.getItem("lesson") || "1");
+    return Number.isFinite(n) && n > 0 ? n : 1;
+  }
+
+  const actions = {
+    continue(){
+      const lessonNow = currentLesson();
+      const nextLesson = lessonNow + 1;
+
+      if (nextLesson > 20) {
+        alert("You are already on the last lesson.");
+        return;
+      }
+
+      sessionStorage.setItem("lesson", String(nextLesson));
+      sessionStorage.setItem("selectedLesson", String(nextLesson));
+      sessionStorage.setItem("currentLesson", String(nextLesson));
+
+      window.location.href = "conductor.html?lesson=" + nextLesson + "&prep=" + Date.now();
+    },
+
+    exit(){
+      goTo("../quit.html");
+    },
+
+    choosel(){
+      goTo("lessonselect.html");
+    },
+
+    help(){
+      goTo("guidelines.html");
+    },
+
+    email(){
+      openContactOverlay();
+    },
+
+    donate(){
+      goTo("donate.html");
+    },
+
+    // Button 7: La Gente - copied from the working Plática V2 desktop pattern.
+    // The conductor lives in the desktop folder, so La Gente is one level up.
+    goback(){
+      const lesson = currentLesson();
+      const returnHref = new URL(window.location.href);
+      returnHref.searchParams.set("lesson", String(lesson));
+      returnHref.searchParams.set("prep", Date.now());
+
+      sessionStorage.setItem("lagenteReturnHref", returnHref.href);
+      localStorage.setItem("lagenteReturnHref", returnHref.href);
+
+      localStorage.setItem("inglesyaLane", "desktop");
+      localStorage.setItem("platicaLane", "desktop");
+      localStorage.setItem("lesson", String(lesson));
+      localStorage.setItem("selectedLesson", String(lesson));
+      localStorage.setItem("currentLesson", String(lesson));
+
+      goTo("../lagente.html?return=desktop&lesson=" + encodeURIComponent(lesson) + "&returnHref=" + encodeURIComponent(returnHref.href));
+    },
+
+    // Keep this alias so older button labels still work if one slips through.
+    lagente(){
+      const lesson = currentLesson();
+      const returnHref = new URL(window.location.href);
+      returnHref.searchParams.set("lesson", String(lesson));
+      returnHref.searchParams.set("prep", Date.now());
+
+      sessionStorage.setItem("lagenteReturnHref", returnHref.href);
+      localStorage.setItem("lagenteReturnHref", returnHref.href);
+
+      localStorage.setItem("inglesyaLane", "desktop");
+      localStorage.setItem("platicaLane", "desktop");
+      localStorage.setItem("lesson", String(lesson));
+      localStorage.setItem("selectedLesson", String(lesson));
+      localStorage.setItem("currentLesson", String(lesson));
+
+      goTo("../lagente.html?return=desktop&lesson=" + encodeURIComponent(lesson) + "&returnHref=" + encodeURIComponent(returnHref.href));
+    },
+
+    translate(){
+      const lesson = currentLesson();
+      const player = document.getElementById("player");
+      if (!player) return;
+
+      // Shared group folder is one level above this conductor.
+      player.src = `../group/lesson${lesson}/translation/a1.m4a`;
+      player.currentTime = 0;
+      player.play().catch(err => console.log("translation play failed:", err));
+    }
+  };
+
+  pbar.addEventListener("click", ev => {
+    const button = ev.target.closest(".buttonz[data-btn]");
+    if (!button) return;
+
+    ev.preventDefault();
+    ev.stopPropagation(); // keeps button clicks from being treated like tile clicks
+
+    const action = actions[button.dataset.btn];
+    if (action) action();
+  });
+})();
+</script>
+
+<script>
+
+console.log("Lesson:", lesson);
+console.log("Tense:", tense);
+</script>
+
+
+
+
+<script>
+// ----- Conductor preparation pause -----
+// The lesson select page only chooses the lesson. The visible pause/credits overlay
+// belongs here in conductor.html, where the lesson itself is being prepared.
+(function(){
+  const MINIMUM_PREP_DELAY_MS = 2000;
+  let prepTimer = null;
+
+  function overlay(){
+    return document.getElementById("prepOverlay");
+  }
+
+  function showPrepOverlay(){
+    const box = overlay();
+    if (box) box.classList.remove("done");
+  }
+
+  function closePrepOverlay(){
+    const box = overlay();
+    if (box) box.classList.add("done");
+  }
+
+  function runPrepPause(){
+    showPrepOverlay();
+    window.clearTimeout(prepTimer);
+    prepTimer = window.setTimeout(closePrepOverlay, MINIMUM_PREP_DELAY_MS);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", runPrepPause, { once:true });
+  } else {
+    runPrepPause();
+  }
+
+  // If the browser restores this page from its back/forward memory,
+  // make the overlay behavior reliable again instead of leaving an old hidden state.
+  window.addEventListener("pageshow", function(ev){
+    if (ev.persisted) runPrepPause();
+  });
+})();
+</script>
+
+
+<script>
+// ----- Right-click magnifier -----
+// Right-click any lesson picture to enlarge it.
+// The red X in the upper-right closes the enlarged view.
+(function(){
+  const overlay = document.getElementById("imageMagnifierOverlay");
+  const magnifiedImage = document.getElementById("imageMagnifierImage");
+  const closeButton = document.getElementById("imageMagnifierClose");
+
+  if (!overlay || !magnifiedImage || !closeButton) return;
+
+  function openMagnifier(sourceImage){
+    const src = sourceImage.currentSrc || sourceImage.src;
+    if (!src) return;
+
+    magnifiedImage.src = src;
+    magnifiedImage.alt = sourceImage.alt || "Magnified image";
+    overlay.hidden = false;
+  }
+
+  function closeMagnifier(){
+    overlay.hidden = true;
+    magnifiedImage.removeAttribute("src");
+  }
+
+  document.addEventListener("contextmenu", function(ev){
+    const sourceImage = ev.target.closest(".tile img");
+    if (!sourceImage) return;
+
+    ev.preventDefault();
+    ev.stopPropagation();
+    openMagnifier(sourceImage);
+  });
+
+  closeButton.addEventListener("click", function(ev){
+    ev.preventDefault();
+    ev.stopPropagation();
+    closeMagnifier();
+  });
+
+  // Only the red X button closes the magnified image.
+  // Clicking outside the image no longer closes it.
+  document.addEventListener("keydown", function(ev){
+    if (ev.key === "Escape" && !overlay.hidden) {
+      closeMagnifier();
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

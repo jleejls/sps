@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Conductor</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+   :root{
+    --trigger-size: 54px;
+    --trigger-gap: 8px;
+    --trigger-pad-y: 8px;
+    --trigger-pad-x: 10px;
+    --trigger-bar-height: calc(var(--trigger-size) + (var(--trigger-pad-y) * 2));
+  }
+  *{ box-sizing:border-box; }
+  html, body{
+    margin:0;
+    width:100%;
+    height:100%;
+    background:#ffffff;
+    overflow:auto;
+    font-family:Arial, Helvetica, sans-serif;
+  }
+  body{
+    margin:0;
+    font-family:system-ui,Segoe UI,Roboto,Arial;
+    background:#ffffff;
+    color:#222;
+  }
+  header{
+    display:none;
+  }
+  main{
+    max-width:1140px;
+    margin:0 auto;
+    padding:46px 12px 64px;
+  }
+
+  h3{
+    display:none;
+  }
+
+  .lesson-number-badge{
+    position:fixed;
+    top:10px;
+    right:12px;
+    z-index:70;
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    background:#fffbea;
+    border:2px solid #8a6a25;
+    color:#3b3020;
+    box-shadow:0 2px 8px rgba(0,0,0,.18);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font:bold 18px Arial, Helvetica, sans-serif;
+    pointer-events:none;
+  }
+
+  /* Three columns: objects left, pronouns center, objects right */
+  .director-grid{
+    display:grid;
+    grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr) minmax(0,.8fr);
+    gap:6px;
+    align-items:flex-start;
+  }
+  .director-column{
+    min-width:0;
+  }
+
+  @media (max-width:900px){
+    .director-grid{
+      grid-template-columns:1fr;
+    }
+  }
+
+  /* Pronoun area: 3x3 grid */
+  .pronoun-grid{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:3px;
+  }
+
+  /* Object columns: 5 vertical tiles each */
+  .object-col{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+  }
+
+/* Make object pictures visually larger */
+.object-slot {
+  overflow: hidden;
+}
+
+.object-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: scale(1.35);
+}
+
+.tile{
+    position:relative;
+    border:1px solid #d7dbe3;
+    border-radius:10px;
+    overflow:visible;
+    cursor:pointer;
+    background:#f9fafb;
+    aspect-ratio:1/1;
+    max-height:150px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+/* shrink ONLY object slots */
+#objLeft .tile,
+#objRight .tile {
+    max-height:105px;
+    aspect-ratio:1/1;
+    overflow:hidden;
+}
+
+#objLeft .tile img,
+#objRight .tile img {
+    width:100%;
+    height:100%;
+    max-width:none;
+    max-height:none;
+    object-fit:contain;
+    transform:scale(1.45);
+}
+
+/* your existing img rules can stay as they are */
+.tile img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:block;
+}
+
+#objLeft .tile img,
+#objRight .tile img {
+    max-width:60%;
+    max-height:60%;
+}
+
+
+
+  .label{
+    font:11px/1.2 monospace;
+    color:#555;
+    text-align:center;
+    padding:4px;
+    white-space:pre-line;
+  }
+
+
+
+/* Make desktop pronoun expression frames P8 and P9 round */
+#pronouns .tile[data-index="8"],
+#pronouns .tile[data-index="9"] {
+    border-radius:50%;
+    overflow:hidden;
+}
+
+#pronouns .tile[data-index="8"] img,
+#pronouns .tile[data-index="9"] img {
+    border-radius:50%;
+    width:75%;
+    height:75%;
+}
+
+#pronouns .tile[data-index="8"].speaking,
+#pronouns .tile[data-index="9"].speaking {
+    outline:4px solid #c00000;
+    outline-offset:3px;
+    box-shadow:0 0 0 5px rgba(192,0,0,.16), 0 2px 8px rgba(0,0,0,.18);
+}
+
+  /* Bottom image buttons copied from the button-study essence */
+  .zipbutton{
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+    justify-content:center;
+    gap:2vh;
+    position:fixed;
+    bottom:2vh;
+    left:50%;
+    transform:translateX(-50%);
+    background-color:#f0f0f0;
+    padding:6px 10px;
+    border-radius:10px;
+    border:1px solid #ddd;
+    z-index:50;
+  }
+
+  .buttonz{
+    border:2px solid #4CAF50;
+    border-radius:1vw;
+    height:5vh;
+    width:5vw;
+    min-width:56px;
+    min-height:36px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:14px;
+    background-color:#d05000;
+    cursor:pointer;
+  }
+
+  .buttonz img{
+    max-width:100%;
+    max-height:100%;
+    display:block;
+    pointer-events:none;
+  }
+
+
+  /* Email contact overlay: stays invisible until the email button opens it */
+  .contact-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.45);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:200;
+    padding:20px;
+  }
+
+  .contact-overlay[hidden]{
+    display:none;
+  }
+
+  .contact-box{
+    background:white;
+    color:black;
+    padding:25px;
+    border-radius:12px;
+    max-width:430px;
+    text-align:center;
+    font-family:Arial, sans-serif;
+    box-shadow:0 8px 25px rgba(0,0,0,.25);
+  }
+
+  .contact-box a,
+  .contact-box button{
+    display:inline-block;
+    margin:6px;
+    padding:9px 13px;
+    border-radius:8px;
+    border:1px solid #777;
+    background:#f4f4f4;
+    color:#111;
+    text-decoration:none;
+    font:14px Arial, sans-serif;
+    cursor:pointer;
+  }
+
+  .contact-address{
+    font-weight:bold;
+    margin:10px 0 14px;
+  }
+
+  /* Small debug badge */
+  .foot{
+    display:none;
+  }
+
+  @media (max-width:600px){
+    main{
+      padding-bottom:80px;
+    }
+  }
+
+
+  /* Lesson preparation pause overlay lives in conductor.html only. */
+  .prep-overlay{
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(255,247,223,0.94);
+    padding:20px;
+  }
+
+  .prep-overlay.done{
+    display:none;
+  }
+
+  .prep-card{
+    width:min(90vw,430px);
+    background:#ffffff;
+    border:1px solid #d7c88a;
+    border-radius:16px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.22);
+    text-align:center;
+    padding:24px 18px;
+  }
+
+  .prep-spinner{
+    width:38px;
+    height:38px;
+    border:5px solid #ddd;
+    border-top-color:#007acc;
+    border-radius:50%;
+    margin:0 auto 14px;
+    animation:prepSpin 0.85s linear infinite;
+  }
+
+  @keyframes prepSpin{
+    to{ transform:rotate(360deg); }
+  }
+
+  .prep-message{
+    font-size:18px;
+    font-weight:700;
+    margin:0;
+    color:#3b3020;
+  }
+
+  .prep-credit{
+    font-size:13px;
+    margin:10px 0 0;
+    color:#665536;
+  }
+
+  .prep-credits{
+    margin:14px auto 0;
+    padding-top:12px;
+    border-top:1px solid #e4d8aa;
+    text-align:left;
+  }
+
+  .prep-credits h2{
+    margin:0 0 8px;
+    text-align:center;
+    font-size:1rem;
+    color:#3b3020;
+  }
+
+  .prep-credits ul{
+    list-style:none;
+    padding:0;
+    margin:0;
+    font-size:0.84rem;
+    line-height:1.35;
+    color:#4d402b;
+  }
+
+  @media (max-width:700px){
+    .prep-card{ padding:20px 15px; }
+    .prep-credits ul{
+      font-size:0.78rem;
+      line-height:1.25;
+    }
+  }
+
+</style>
+<script>
+// ----- Conductor startup -----
+// Accept the lesson number no matter which earlier page stored it.
+(function () {
+  const storedLesson =
+    sessionStorage.getItem("selectedLesson") ||
+    sessionStorage.getItem("lesson") ||
+    sessionStorage.getItem("currentLesson") ||
+    "1";
+
+  const cleanLesson = Number(storedLesson);
+  const lessonToUse = Number.isFinite(cleanLesson) && cleanLesson > 0 ? String(cleanLesson) : "1";
+
+  sessionStorage.setItem("lesson", lessonToUse);
+  sessionStorage.setItem("selectedLesson", lessonToUse);
+
+  if (!sessionStorage.getItem("tense")) {
+    sessionStorage.setItem("tense", "now");
+  }
+})();
+
+const lesson = sessionStorage.getItem("lesson") || "1";
+const tense  = sessionStorage.getItem("tense")  || "now";
+
+console.log("=== CONDUCTOR STORAGE CHECK ===");
+
+for (let i = 0; i < sessionStorage.length; i++) {
+  const key = sessionStorage.key(i);
+  console.log(key, "=", sessionStorage.getItem(key));
+}
+</script>
+</head>
+<body>
+
+<div id="prepOverlay" class="prep-overlay" aria-live="polite" aria-label="Lesson preparation message">
+  <div class="prep-card">
+    <div class="prep-spinner" aria-hidden="true"></div>
+    <p class="prep-message">Your lesson is being prepared...</p>
+    <p class="prep-credit">Created by Jimmy Self</p>
+
+    <div class="prep-credits" aria-label="Credits">
+      <h2>Créditos</h2>
+      <ul>
+        <li><strong>Creador del proyecto:</strong> Jimmy Self</li>
+        <li><strong>Ayudante:</strong> AJ Cornell</li>
+        <li><strong>Diseño y Arte:</strong> José García</li>
+        <li><strong>Visuales:</strong> María Flores</li>
+        <li><strong>Audio:</strong> Jimmy Self</li>
+        <li><strong>Asesor de producción:</strong> Prof. Eduardo De León</li>
+        <li><strong>Actores:</strong> A.J. Cornell, Rachel Cornell</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<div id="lessonBadge" class="lesson-number-badge" aria-label="Lesson number"></div>
+
+<header id="banner">Director</header>
+
+<main>
+  <div class="director-grid">
+    <!-- LEFT: objects 1–5 -->
+    <section class="director-column">
+      <h3>Objects</h3>
+      <div id="objLeft" class="object-col"></div>
+    </section>
+
+    <!-- CENTER: pronouns 1–9 -->
+    <section class="director-column">
+      <h3>Pronouns</h3>
+      <div id="pronouns" class="pronoun-grid"></div>
+    </section>
+
+    <!-- RIGHT: objects 6–10 -->
+    <section class="director-column">
+      <h3>&nbsp;</h3>
+      <div id="objRight" class="object-col"></div>
+    </section>
+  </div>
+</main>
+
+<div id="pbar" class="zipbutton" aria-label="Program buttons">
+  <div class="buttonz" data-btn="continue" title="Advance to next page">
+  <img src="../trigger/adelante.png" alt="Advance">
+</div>
+<div class="buttonz" data-btn="exit" title="Exit"
+     onclick="window.location.assign('../quit.html');">
+  <img src="../trigger/exit.png">
+</div>
+  <div class="buttonz" data-btn="choosel" title="Choose lesson">
+    <img src="../trigger/choosel.png" alt="Choose lesson">
+  </div>
+  <div class="buttonz" data-btn="help" title="Help / guidelines">
+    <img src="../trigger/help.png" alt="Help">
+  </div>
+  <div class="buttonz" data-btn="email" title="Contact Jimmy Lucky">
+    <img src="../trigger/email.png" alt="Email">
+  </div>
+  <div class="buttonz" data-btn="donate" title="Donate">
+    <img src="../trigger/donate.png" alt="Donate">
+  </div>
+  <div class="buttonz" data-btn="goback" title="Go back">
+    <img src="../trigger/goback.png" alt="Back">
+  </div>
+  <div class="buttonz" data-btn="translate" title="Translation">
+    <img src="../trigger/translate.png" alt="Translate">
+  </div>
+</div>
+
+<div id="contactOverlay" class="contact-overlay" hidden>
+  <div class="contact-box">
+    <h2>Contact Jimmy Lucky</h2>
+    <p>To contact Jimmy Lucky, please leave this lesson page and open your own email program.</p>
+    <p>You may write in English or Spanish.</p>
+    <p>Send your message to:</p>
+    <p class="contact-address">spanishsoundbites@gmail.com</p>
+
+    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=spanishsoundbites@gmail.com" target="_blank" rel="noopener">
+      Open Gmail
+    </a>
+
+       <button type="button" onclick="closeContactOverlay()">
+      Go Back
+    </button>
+  </div>
+</div>
+<audio id="player" preload="auto"></audio>
+
+<script>
+(function(){
+  // ----- Layout + selection data from sessionStorage -----
+  const pronounSlots = JSON.parse(sessionStorage.getItem("pronounSlots") || "[]");
+  const objectSlots  = JSON.parse(sessionStorage.getItem("objectSlots")  || "[]");
+  const exprIds      = JSON.parse(sessionStorage.getItem("expressionPronounIds") || "[]");
+
+  // Fallback layout so page still works if nothing was stored
+  if (!pronounSlots.length) {
+    for (let i = 1; i <= 9; i++) {
+      pronounSlots.push({ id: i, kind: i <= 7 ? "main" : "expression" });
+    }
+  }
+  if (!objectSlots.length) {
+    for (let i = 1; i <= 10; i++) {
+      objectSlots.push({ id: i, column: i <= 5 ? 1 : 2 });
+    }
+  }
+  const tense  = sessionStorage.getItem("tense")  || "now";
+  let lesson = Number(
+    sessionStorage.getItem("lesson") ||
+    sessionStorage.getItem("selectedLesson") ||
+    sessionStorage.getItem("currentLesson") ||
+    "1"
+  );
+  if (!lesson || Number.isNaN(lesson)) lesson = 1;
+  sessionStorage.setItem("lesson", String(lesson));
+  sessionStorage.setItem("selectedLesson", String(lesson));
+
+  const basePath = `../group/lesson${lesson}`;
+  document.getElementById("banner").textContent = "";
+  const lessonBadge = document.getElementById("lessonBadge");
+  if (lessonBadge) lessonBadge.textContent = String(lesson);
+
+  // ----- Paths -----
+  // This conductor supports both folder styles:
+  // 1) old split folders: pronouns/images, objects/images, pronouns/audios, objects/audios
+  // 2) newer single folders: image and sound
+  const pronImg = i => [
+    `${basePath}/pronouns/images/p${i}.png`,
+    `${basePath}/image/p${i + 10}.png`,
+    `${basePath}/image/p${i}.png`
+  ];
+  const objImg  = i => [
+    `${basePath}/objects/images/p${i}.png`,
+    `${basePath}/image/p${i}.png`
+  ];
+  const pronAud = i => [
+    `${basePath}/pronouns/audios/a${i}.m4a`,
+    `${basePath}/sound/${i + 10}.m4a`,
+    `${basePath}/sound/${i}.m4a`
+  ];
+  const objAud  = i => [
+    `${basePath}/objects/audios/a${i}.m4a`,
+    `${basePath}/sound/${i}.m4a`
+  ];
+
+
+  // ----- Conversation-circle audio paths -----
+  // Francisco uses expression pronoun P8, Rachel uses expression pronoun P9.
+  // These paths are read from the lesson folder; conductor does not create layout values.
+  const FRANCISCO_EXPRESSION_ID = exprIds[0] || 8;
+  const RACHEL_EXPRESSION_ID = exprIds[1] || 9;
+
+  function conversationAud(speaker, role, number){
+    const shortSpeaker = speaker === "francisco" ? "f" : "r";
+    const shortRole = role === "statement" ? "s" : "reply";
+
+    return [
+      `${basePath}/conversation/${speaker}_${role}_${number}.m4a`,
+      `${basePath}/conversation/${speaker}-${role}-${number}.m4a`,
+      `${basePath}/conversation/${shortSpeaker}_${shortRole}_${number}.m4a`,
+      `${basePath}/conversation/${shortSpeaker}${shortRole}${number}.m4a`,
+      `${basePath}/conversation/${speaker}${number}.m4a`,
+      `${basePath}/conversation/${shortSpeaker}${number}.m4a`
+    ];
+  }
+
+  function buildConversationItems(){
+    const items = [];
+
+    for (let i = 1; i <= 15; i++) {
+      items.push({ speakerId: FRANCISCO_EXPRESSION_ID, sources: conversationAud("francisco", "statement", i) });
+      items.push({ speakerId: RACHEL_EXPRESSION_ID, sources: conversationAud("rachel", "reply", i) });
+    }
+
+    for (let i = 1; i <= 15; i++) {
+      items.push({ speakerId: RACHEL_EXPRESSION_ID, sources: conversationAud("rachel", "statement", i) });
+      items.push({ speakerId: FRANCISCO_EXPRESSION_ID, sources: conversationAud("francisco", "reply", i) });
+    }
+
+    return items;
+  }
+
+  // ----- Tile builder -----
+  function makeTile(srcList, fallbackLabel){
+    const sources = Array.isArray(srcList) ? srcList : [srcList];
+    let srcIndex = 0;
+
+    const d = document.createElement("div");
+    d.className = "tile";
+    const img = document.createElement("img");
+    img.alt = fallbackLabel;
+
+    img.onerror = () => {
+      srcIndex += 1;
+      if (srcIndex < sources.length) {
+        img.src = sources[srcIndex];
+      } else {
+        d.innerHTML = `<div class="label">missing:\n${fallbackLabel}</div>`;
+      }
+    };
+
+    img.src = sources[srcIndex];
+    d.appendChild(img);
+    return d;
+  }
+
+  // ----- Build pronoun tiles (3×3 grid, ids 1..9) -----
+  const pronMount = document.getElementById("pronouns");
+  const expressionTilesByIndex = {};
+  pronounSlots.forEach(slot => {
+    const t = makeTile(pronImg(slot.id), `p${slot.id}.png`);
+    t.dataset.group = "pronouns";
+    t.dataset.index = slot.id;
+    t.dataset.kind  = slot.kind || "main"; // "main" or "expression"
+    if (isExpressionPronoun(slot.id)) {
+      expressionTilesByIndex[slot.id] = t;
+    }
+    pronMount.appendChild(t);
+  });
+
+  // ----- Build object tiles (5 left, 5 right) -----
+  const leftCol  = document.getElementById("objLeft");
+  const rightCol = document.getElementById("objRight");
+
+  objectSlots.forEach(slot => {
+    const t = makeTile(objImg(slot.id), `p${slot.id}.png`);
+    t.dataset.group = "objects";
+    t.dataset.index = slot.id;
+
+    if (slot.column === 1) {
+      leftCol.appendChild(t);
+    } else {
+      rightCol.appendChild(t);
+    }
+  });
+
+  // ----- Audio logic: no overlaps, serial uniting -----
+  const player = document.getElementById("player");
+  let lastPronSrc = null;
+  let lastPronJoinable = false;
+  let playToken = 0;
+
+  function isExpressionPronoun(index){
+    // A8 and A9 are expression audios.
+    // They must always play alone and must never be saved for joining with objects.
+    return index === 8 || index === 9 || exprIds.includes(index);
+  }
+
+  function playSequence(sources){
+    clearExpressionHighlights();
+    playToken++;
+    const myToken = playToken;
+    let i = 0;
+
+    function playOne(srcList){
+      const choices = Array.isArray(srcList) ? srcList : [srcList];
+      let choiceIndex = 0;
+
+      function tryChoice(){
+        if (myToken !== playToken) return;
+        if (choiceIndex >= choices.length) {
+          next();
+          return;
+        }
+
+        const src = choices[choiceIndex++];
+        player.onerror = tryChoice;
+        player.src = src;
+        player.currentTime = 0;
+        player.play().catch(err => {
+          console.log("play failed:", err);
+        });
+      }
+
+      tryChoice();
+    }
+
+    function next(){
+      if (myToken !== playToken) return;
+      if (i >= sources.length) return;
+      playOne(sources[i++]);
+    }
+
+    player.onended = () => {
+      if (myToken !== playToken) return;
+      next();
+    };
+
+    next();
+  }
+
+
+  function clearExpressionHighlights(){
+    Object.values(expressionTilesByIndex).forEach(tile => tile.classList.remove("speaking"));
+  }
+
+  function markExpressionSpeaker(speakerId){
+    clearExpressionHighlights();
+    const tile = expressionTilesByIndex[speakerId];
+    if (tile) tile.classList.add("speaking");
+  }
+
+  // Conversation stepping: one click plays one two-part exchange, then stops.
+  // The exchanges are shuffled, so the student does not hear 1,2,3,4 every time.
+  // After every exchange in the active set has been used once, the shuffle bag refills
+  // and a new random round begins automatically.
+  //
+  // For the current Lesson 1 trial, this is set to false because you have
+  // Francisco statements + Rachel replies prepared.
+  // Later, after Rachel statements + Francisco replies are recorded, change this to true.
+  const USE_RACHEL_STATEMENT_ROUND = false;
+
+  let conversationShuffleBag = [];
+
+  function buildConversationPairs(){
+    const pairs = [];
+
+    // Francisco asks / Rachel replies: 15 two-part exchanges.
+    for (let i = 1; i <= 15; i++) {
+      pairs.push([
+        { speakerId: FRANCISCO_EXPRESSION_ID, sources: conversationAud("francisco", "statement", i) },
+        { speakerId: RACHEL_EXPRESSION_ID, sources: conversationAud("rachel", "reply", i) }
+      ]);
+    }
+
+    // Rachel asks / Francisco replies: second 15 exchanges.
+    // Turn this on after those 30 additional audio files exist.
+    if (USE_RACHEL_STATEMENT_ROUND) {
+      for (let i = 1; i <= 15; i++) {
+        pairs.push([
+          { speakerId: RACHEL_EXPRESSION_ID, sources: conversationAud("rachel", "statement", i) },
+          { speakerId: FRANCISCO_EXPRESSION_ID, sources: conversationAud("francisco", "reply", i) }
+        ]);
+      }
+    }
+
+    return pairs;
+  }
+
+  function shuffleArray(items){
+    for (let i = items.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const temp = items[i];
+      items[i] = items[j];
+      items[j] = temp;
+    }
+    return items;
+  }
+
+  function refillConversationShuffleBag(){
+    conversationShuffleBag = shuffleArray(buildConversationPairs());
+  }
+
+  function playRandomConversationPair(){
+    if (!conversationShuffleBag.length) {
+      refillConversationShuffleBag();
+    }
+
+    if (!conversationShuffleBag.length) return;
+
+    const pairItems = conversationShuffleBag.shift();
+    playConversationPairOnly(pairItems);
+  }
+
+  function playConversationPairOnly(items){
+    playToken++;
+    const myToken = playToken;
+    let i = 0;
+
+    try { player.pause(); } catch(e) {}
+    player.onended = null;
+    player.onerror = null;
+
+    function stopPair(){
+      if (myToken !== playToken) return;
+      player.onended = null;
+      player.onerror = null;
+      clearExpressionHighlights();
+    }
+
+    function playOne(item){
+      const choices = Array.isArray(item.sources) ? item.sources : [item.sources];
+      let choiceIndex = 0;
+      markExpressionSpeaker(item.speakerId);
+
+      function tryChoice(){
+        if (myToken !== playToken) return;
+        if (choiceIndex >= choices.length) {
+          next();
+          return;
+        }
+
+        const src = choices[choiceIndex++];
+        player.onerror = tryChoice;
+        player.src = src;
+        player.currentTime = 0;
+        player.play().catch(err => {
+          console.log("conversation play failed:", err);
+          tryChoice();
+        });
+      }
+
+      tryChoice();
+    }
+
+    function next(){
+      if (myToken !== playToken) return;
+      if (i >= items.length) {
+        stopPair();
+        return;
+      }
+      playOne(items[i++]);
+    }
+
+    player.onended = () => {
+      if (myToken !== playToken) return;
+      next();
+    };
+
+    next();
+  }
+
+  // ----- Click handling -----
+  document.addEventListener("click", ev => {
+    const el = ev.target.closest(".tile[data-group][data-index]");
+    if (!el) return;
+
+    const group = el.dataset.group;
+    const index = Number(el.dataset.index);
+
+    if (group === "pronouns") {
+      const src = pronAud(index);
+
+      if (isExpressionPronoun(index)) {
+        lastPronSrc = null;
+        lastPronJoinable = false;
+        playRandomConversationPair();
+      } else {
+        lastPronSrc = src;
+        lastPronJoinable = true;
+        playSequence([src]);
+      }
+      return;
+    }
+
+if (group === "objects") {
+  const srcObj = objAud(index);
+
+  if (lastPronSrc && lastPronJoinable) {
+    // First click after a pronoun: play united phrase
+    playSequence([lastPronSrc, srcObj]);
+
+    // Then clear the saved pronoun so the NEXT object click is simple
+    lastPronSrc = null;
+    lastPronJoinable = false;
+  } else {
+    // No active pronoun: play only the object audio
+    playSequence([srcObj]);
+  }
+  return;
+}
+  
+  });
+
+})();
+</script>
+
+<script>
+function openContactOverlay(){
+  const overlay = document.getElementById("contactOverlay");
+  if (overlay) overlay.hidden = false;
+}
+
+function closeContactOverlay(){
+  const overlay = document.getElementById("contactOverlay");
+  if (overlay) overlay.hidden = true;
+}
+</script>
+
+<script>
+// ----- Bottom image-button actions -----
+// This is the working button-study idea, now connected to real conductor actions.
+(function(){
+  const pbar = document.getElementById("pbar");
+  if (!pbar) return;
+
+  function goTo(page){
+    window.location.href = page;
+  }
+
+  function currentLesson(){
+    const n = Number(sessionStorage.getItem("lesson") || "1");
+    return Number.isFinite(n) && n > 0 ? n : 1;
+  }
+
+  const actions = {
+    continue(){
+      const lessonNow = currentLesson();
+      const nextLesson = lessonNow + 1;
+
+      if (nextLesson > 20) {
+        alert("You are already on the last lesson.");
+        return;
+      }
+
+      sessionStorage.setItem("lesson", String(nextLesson));
+      sessionStorage.setItem("selectedLesson", String(nextLesson));
+
+      window.location.href = "conductor.html";
+    },
+
+    exit(){
+      goTo("../quit.html");
+    },
+
+    choosel(){
+      goTo("lessonselect.html");
+    },
+
+    help(){
+      goTo("guidelines.html");
+    },
+
+    email(){
+      openContactOverlay();
+    },
+
+    donate(){
+      goTo("donate.html");
+    },
+
+    goback(){
+      if (history.length > 1) {
+        history.back();
+      } else {
+        goTo("index.html");
+      }
+    },
+
+    translate(){
+      const lesson = currentLesson();
+      const player = document.getElementById("player");
+      if (!player) return;
+
+      // Shared group folder is one level above this conductor.
+      player.src = `../group/lesson${lesson}/translation/a1.m4a`;
+      player.currentTime = 0;
+      player.play().catch(err => console.log("translation play failed:", err));
+    }
+  };
+
+  pbar.addEventListener("click", ev => {
+    const button = ev.target.closest(".buttonz[data-btn]");
+    if (!button) return;
+
+    ev.preventDefault();
+    ev.stopPropagation(); // keeps button clicks from being treated like tile clicks
+
+    const action = actions[button.dataset.btn];
+    if (action) action();
+  });
+})();
+</script>
+
+<script>
+
+console.log("Lesson:", lesson);
+console.log("Tense:", tense);
+</script>
+
+
+
+
+<script>
+// ----- Conductor preparation pause -----
+// The lesson select page only chooses the lesson. The visible pause/credits overlay
+// now belongs here, where the lesson itself is being prepared.
+(function(){
+  const minimumPauseMs = 2000;
+  const startedAt = Date.now();
+
+  function closePrepOverlay(){
+    const overlay = document.getElementById("prepOverlay");
+    if (overlay) overlay.classList.add("done");
+  }
+
+  function finishAfterMinimumPause(){
+    const elapsed = Date.now() - startedAt;
+    const remaining = Math.max(0, minimumPauseMs - elapsed);
+    window.setTimeout(closePrepOverlay, remaining);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", finishAfterMinimumPause, { once:true });
+  } else {
+    finishAfterMinimumPause();
+  }
+})();
+</script>
+
+</body>
+</html>
