@@ -563,6 +563,7 @@ for (let i = 0; i < sessionStorage.length; i++) {
 <script>
 (function(){
   // ----- Layout comes only from stationStorage written by structure.html -----
+  const REQUIRED_STRUCTURE_VERSION = "inglesya-phone-pronouns-top-3-4-objects-middle-3-4-3-plus-2-circles-20260624b";
   const stationStorageRaw = sessionStorage.getItem("stationStorage");
   let stationStorage = null;
 
@@ -586,6 +587,22 @@ for (let i = 0; i < sessionStorage.length; i++) {
 
   if (!stationStorage || !Array.isArray(stationStorage.stations) || !stationStorage.stations.length) {
     showStationStorageError("stationStorage does not contain a usable stations list.");
+  }
+
+  if (stationStorage.version !== REQUIRED_STRUCTURE_VERSION) {
+    showStationStorageError("Old or wrong stationStorage reached conductor.html. Open structure.html first so the phone can receive the current pronouns-top structure.");
+  }
+
+  if (stationStorage.stations.length !== 19) {
+    showStationStorageError("stationStorage has the wrong number of stations. Expected 19 stations: 7 pronouns, 10 objects, and 2 circle frames.");
+  }
+
+  const topSevenArePronouns = stationStorage.stations.slice(0, 7).every(station => station.group === "pronouns");
+  const nextTenAreObjects = stationStorage.stations.slice(7, 17).every(station => station.group === "objects");
+  const lastTwoAreCircles = stationStorage.stations.slice(17, 19).every(station => station.group === "pronouns" && station.shape === "circle");
+
+  if (!topSevenArePronouns || !nextTenAreObjects || !lastTwoAreCircles) {
+    showStationStorageError("stationStorage exists, but it is not the corrected phone structure. Expected top 7 pronouns, then 10 objects, then 2 circle frames.");
   }
 
   const exprIds = Array.isArray(stationStorage.expressionPronounIds)
@@ -613,7 +630,7 @@ for (let i = 0; i < sessionStorage.length; i++) {
   // Prefer the new split JPG lesson images first. Keep PNG and old single-folder
   // fallbacks so older backups can still run if they are opened by mistake.
   // The small cache tag helps phones stop showing stale cached pictures.
-  const ASSET_VERSION = "jpg-stage-20260623";
+  const ASSET_VERSION = "phone-storage-fix-20260624c";
   const imgPath = path => `${path}?v=${ASSET_VERSION}`;
 
   const pronImg = i => [

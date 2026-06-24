@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>InglesYa Phone Structure</title>
 <style>
   body{
@@ -30,6 +33,10 @@
 
 <script>
 (function(){
+  sessionStorage.removeItem("stationStorage");
+  sessionStorage.removeItem("inglesyaStructureReady");
+  sessionStorage.removeItem("expressionPronounIds");
+
   // This is the only page that defines the phone frame stations.
   // Conductor reads this stationStorage and renders exactly what is stored here.
   const phoneStructure = {
@@ -100,7 +107,7 @@
     return;
   }
 
-  window.location.replace("lessonselect.html");
+  window.location.replace("lessonselect.html?refresh=" + Date.now());
 })();
 </script>
 </body>
