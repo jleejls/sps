@@ -4,9 +4,6 @@
 <meta charset="UTF-8">
 <title>InglesYa Level Select</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 
 <style>
   * {
@@ -177,43 +174,12 @@
 </div>
 
 <script>
-  const REQUIRED_STRUCTURE_VERSION = "inglesya-phone-pronouns-top-3-4-objects-middle-3-4-3-plus-2-circles-20260624b";
-
-  function currentPhoneStructureIsReady() {
-    try {
-      const raw = sessionStorage.getItem("stationStorage");
-      if (!raw) return false;
-      const data = JSON.parse(raw);
-      if (!data || data.version !== REQUIRED_STRUCTURE_VERSION) return false;
-      if (!Array.isArray(data.stations) || data.stations.length !== 19) return false;
-      const topSevenArePronouns = data.stations.slice(0, 7).every(station => station.group === "pronouns");
-      const nextTenAreObjects = data.stations.slice(7, 17).every(station => station.group === "objects");
-      const lastTwoAreCircles = data.stations.slice(17, 19).every(station => station.group === "pronouns" && station.shape === "circle");
-      return topSevenArePronouns && nextTenAreObjects && lastTwoAreCircles;
-    } catch (err) {
-      return false;
-    }
-  }
-
-  if (!currentPhoneStructureIsReady()) {
-    sessionStorage.removeItem("stationStorage");
-    sessionStorage.removeItem("inglesyaStructureReady");
-    window.location.replace("structure.html?refresh=" + Date.now());
-  }
-
   function goToLevel(levelNumber) {
-    if (!currentPhoneStructureIsReady()) {
-      sessionStorage.removeItem("stationStorage");
-      sessionStorage.removeItem("inglesyaStructureReady");
-      window.location.replace("structure.html?refresh=" + Date.now());
-      return;
-    }
-
-    const lesson = String(levelNumber);
+const lesson = String(levelNumber);
     sessionStorage.setItem("selectedLesson", lesson);
     sessionStorage.setItem("lesson", lesson);
     sessionStorage.setItem("currentLesson", lesson);
-    window.location.href = "conductor.html?refresh=" + Date.now();
+    window.location.href = "conductor.html";
   }
 </script>
 
