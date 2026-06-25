@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>InglesYa Level Select</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Arial, Helvetica, sans-serif;
+    background: linear-gradient(180deg, #dff7ff 0%, #f8f0d8 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .lesson-page {
+    width: 94%;
+    max-width: 900px;
+    padding: 22px;
+    text-align: center;
+  }
+
+  .title-card {
+    background: rgba(255, 255, 255, 0.78);
+    border-radius: 22px;
+    padding: 16px 14px;
+    margin-bottom: 18px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.16);
+  }
+
+  h1 {
+    margin: 0 0 8px 0;
+    font-size: 2.1rem;
+    letter-spacing: 0.5px;
+  }
+
+  .subtitle {
+    font-size: 1.05rem;
+    opacity: 0.85;
+  }
+
+  .lesson-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  .lesson-button {
+    border: none;
+    border-radius: 20px;
+    padding: 19px 10px;
+    font-size: 1.18rem;
+    font-weight: bold;
+    background: rgba(255, 255, 255, 0.92);
+    cursor: pointer;
+    box-shadow: 0 5px 12px rgba(0,0,0,0.18);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+
+  .lesson-button:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 7px 16px rgba(0,0,0,0.22);
+  }
+
+  .lesson-button:active {
+    transform: scale(0.98);
+  }
+
+  .footer-note {
+    margin-top: 18px;
+    font-size: 0.92rem;
+    opacity: 0.72;
+  }
+
+  @media (max-width: 700px) {
+    body {
+      align-items: flex-start;
+    }
+
+    .lesson-page {
+      width: 96%;
+      padding: 14px 10px;
+    }
+
+    .title-card {
+      padding: 12px 10px;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 1.55rem;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+    }
+
+    .lesson-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .lesson-button {
+      padding: 14px 8px;
+      font-size: 1rem;
+      border-radius: 16px;
+    }
+
+    .footer-note {
+      margin-top: 12px;
+      font-size: 0.82rem;
+    }
+  }
+
+  @media (max-height: 720px) and (max-width: 700px) {
+    .lesson-button {
+      padding: 11px 8px;
+      font-size: 0.96rem;
+    }
+
+    h1 {
+      font-size: 1.38rem;
+    }
+
+    .subtitle {
+      display: none;
+    }
+  }
+</style>
+</head>
+
+<body>
+<div class="lesson-page">
+  <div class="title-card">
+    <h1>InglesYa</h1>
+    <div class="subtitle">Select a level</div>
+  </div>
+
+  <div class="lesson-grid">
+    <button class="lesson-button" onclick="goToLevel(1)">Level 1-have</button>
+    <button class="lesson-button" onclick="goToLevel(2)">Level 2-want</button>
+    <button class="lesson-button" onclick="goToLevel(3)">Level 3-say</button>
+    <button class="lesson-button" onclick="goToLevel(4)">Level 4-be</button>
+
+    <button class="lesson-button" onclick="goToLevel(5)">Level 5-need</button>
+    <button class="lesson-button" onclick="goToLevel(6)">Level 6-go</button>
+    <button class="lesson-button" onclick="goToLevel(7)">Level 7-know</button>
+    <button class="lesson-button" onclick="goToLevel(8)">Level 8-come</button>
+
+    <button class="lesson-button" onclick="goToLevel(9)">Level 9-eat</button>
+    <button class="lesson-button" onclick="goToLevel(10)">Level 10-drink</button>
+    <button class="lesson-button" onclick="goToLevel(11)">Level 11-speak</button>
+    <button class="lesson-button" onclick="goToLevel(12)">Level 12-see</button>
+
+    <button class="lesson-button" onclick="goToLevel(13)">Level 13-take</button>
+    <button class="lesson-button" onclick="goToLevel(14)">Level 14-can</button>
+    <button class="lesson-button" onclick="goToLevel(15)">Level 15-live</button>
+    <button class="lesson-button" onclick="goToLevel(16)">Level 16-hear</button>
+
+    <button class="lesson-button" onclick="goToLevel(17)">Level 17-give</button>
+    <button class="lesson-button" onclick="goToLevel(18)">Level 18-put</button>
+    <button class="lesson-button" onclick="goToLevel(19)">Level 19-make</button>
+    <button class="lesson-button" onclick="goToLevel(20)">Level 20-think</button>
+  </div>
+
+  <div class="footer-note">Working level selector</div>
+</div>
+
+<script>
+  function goToLevel(levelNumber) {
+const lesson = String(levelNumber);
+    sessionStorage.setItem("selectedLesson", lesson);
+    sessionStorage.setItem("lesson", lesson);
+    sessionStorage.setItem("currentLesson", lesson);
+    window.location.href = "conductor.html";
+  }
+</script>
+
+</body>
+</html>
