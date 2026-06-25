@@ -616,29 +616,29 @@ for (let i = 0; i < sessionStorage.length; i++) {
 
 <div id="pbar" class="zipbutton" aria-label="Program buttons">
   <div class="buttonz" data-btn="continue" title="Advance to next page">
-    <img src="../trigger/adelante.png" alt="Advance">
+    <img src="../trigger/adelante.jpg" alt="Advance">
   </div>
   <div class="buttonz" data-btn="exit" title="Exit" onclick="window.location.assign('../quit.html');">
-    <img src="../trigger/exit.png" alt="Exit">
+    <img src="../trigger/exit.jpg" alt="Exit">
   </div>
   <div class="buttonz" data-btn="choosel" title="Choose lesson">
-    <img src="../trigger/choosel.png" alt="Choose lesson">
+    <img src="../trigger/choosel.jpg" alt="Choose lesson">
   </div>
   <div class="buttonz" data-btn="help" title="Help / guidelines">
-    <img src="../trigger/help.png" alt="Help">
+    <img src="../trigger/help.jpg" alt="Help">
   </div>
   <div class="buttonz" data-btn="donate" title="Donate">
-    <img src="../trigger/donate.png" alt="Donate">
+    <img src="../trigger/donate.jpg" alt="Donate">
   </div>
     <div class="buttonz" data-btn="email" title="Contact Jimmy Lucky">
-    <img src="../trigger/email.png" alt="Email">
+    <img src="../trigger/email.jpg" alt="Email">
   </div>
   <!-- Button 7: La Gente - use the same clean desktop return pattern as Plática V2 -->
   <div class="buttonz" data-btn="goback" title="La Gente">
-    <img src="../trigger/lagente.png" alt="La Gente">
+    <img src="../trigger/lagente.jpg" alt="La Gente">
   </div>
   <div class="buttonz" data-btn="translate" title="Translation">
-    <img src="../trigger/translate.png" alt="Translate">
+    <img src="../trigger/translate.jpg" alt="Translate">
   </div>
 </div>
 
@@ -687,32 +687,12 @@ for (let i = 0; i < sessionStorage.length; i++) {
   if (lessonBadge) lessonBadge.textContent = String(lesson);
 
   // ----- Paths -----
-  // Stage/JPG version:
-  // Prefer the new split JPG lesson images first. Keep PNG and old single-folder
-  // fallbacks so older backups can still run if they are opened by mistake.
-  // The small cache tag helps phones stop showing stale cached pictures.
-  const ASSET_VERSION = "jpg-stage-20260623";
+  // Strict modular JPG version. No PNG fallback and no old image-folder fallback.
+  const ASSET_VERSION = "clean-sps-strict-jpg-20260624";
   const imgPath = path => `${path}?v=${ASSET_VERSION}`;
 
-  const pronImg = i => [
-    imgPath(`${basePath}/pronouns/images/p${i}.jpg`),
-    imgPath(`${basePath}/pronouns/images/p${i}.jpeg`),
-    imgPath(`${basePath}/pronouns/images/p${i}.png`),
-    imgPath(`${basePath}/image/p${i + 10}.jpg`),
-    imgPath(`${basePath}/image/p${i + 10}.jpeg`),
-    imgPath(`${basePath}/image/p${i + 10}.png`),
-    imgPath(`${basePath}/image/p${i}.jpg`),
-    imgPath(`${basePath}/image/p${i}.jpeg`),
-    imgPath(`${basePath}/image/p${i}.png`)
-  ];
-  const objImg  = i => [
-    imgPath(`${basePath}/objects/images/p${i}.jpg`),
-    imgPath(`${basePath}/objects/images/p${i}.jpeg`),
-    imgPath(`${basePath}/objects/images/p${i}.png`),
-    imgPath(`${basePath}/image/p${i}.jpg`),
-    imgPath(`${basePath}/image/p${i}.jpeg`),
-    imgPath(`${basePath}/image/p${i}.png`)
-  ];
+  const pronImg = i => imgPath(`${basePath}/pronouns/images/p${i}.jpg`);
+  const objImg  = i => imgPath(`${basePath}/objects/images/p${i}.jpg`);
   const pronAud = i => [
     `${basePath}/pronouns/audios/a${i}.m4a`,
     `${basePath}/sound/${i + 10}.m4a`,
@@ -1110,43 +1090,26 @@ function closeContactOverlay(){
       goTo("donate.html");
     },
 
-    // Button 7: La Gente - copied from the working Plática V2 desktop pattern.
-    // The conductor lives in the desktop folder, so La Gente is one level up.
-    goback(){
+    // Button 7: La Gente - clean lane return, no file URL storage and no Plática fallback.
+    openLaGente(){
       const lesson = currentLesson();
-      const returnHref = new URL(window.location.href);
-      returnHref.searchParams.set("lesson", String(lesson));
-      returnHref.searchParams.set("prep", Date.now());
-
-      sessionStorage.setItem("lagenteReturnHref", returnHref.href);
-      localStorage.setItem("lagenteReturnHref", returnHref.href);
-
+      sessionStorage.setItem("inglesyaLane", "desktop");
       localStorage.setItem("inglesyaLane", "desktop");
-      localStorage.setItem("platicaLane", "desktop");
+      sessionStorage.setItem("lesson", String(lesson));
+      sessionStorage.setItem("selectedLesson", String(lesson));
+      sessionStorage.setItem("currentLesson", String(lesson));
       localStorage.setItem("lesson", String(lesson));
       localStorage.setItem("selectedLesson", String(lesson));
       localStorage.setItem("currentLesson", String(lesson));
-
-      goTo("../lagente.html?return=desktop&lesson=" + encodeURIComponent(lesson) + "&returnHref=" + encodeURIComponent(returnHref.href));
+      goTo("../lagente.html?return=desktop&lesson=" + encodeURIComponent(lesson));
     },
 
-    // Keep this alias so older button labels still work if one slips through.
+    goback(){
+      actions.openLaGente();
+    },
+
     lagente(){
-      const lesson = currentLesson();
-      const returnHref = new URL(window.location.href);
-      returnHref.searchParams.set("lesson", String(lesson));
-      returnHref.searchParams.set("prep", Date.now());
-
-      sessionStorage.setItem("lagenteReturnHref", returnHref.href);
-      localStorage.setItem("lagenteReturnHref", returnHref.href);
-
-      localStorage.setItem("inglesyaLane", "desktop");
-      localStorage.setItem("platicaLane", "desktop");
-      localStorage.setItem("lesson", String(lesson));
-      localStorage.setItem("selectedLesson", String(lesson));
-      localStorage.setItem("currentLesson", String(lesson));
-
-      goTo("../lagente.html?return=desktop&lesson=" + encodeURIComponent(lesson) + "&returnHref=" + encodeURIComponent(returnHref.href));
+      actions.openLaGente();
     },
 
     translate(){

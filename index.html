@@ -93,9 +93,13 @@
   <script>
     function goToCorrectLane() {
       if (window.innerWidth < 700) {
-        window.location.href = "ingles_phone/structure.html?v=jpg-stage-20260623";
+        sessionStorage.setItem("inglesyaLane", "phone");
+        localStorage.setItem("inglesyaLane", "phone");
+        window.location.href = "ingles_phone/structure.html?v=clean-sps-20260624";
       } else {
-        window.location.href = "ingles_desktop/structure.html?v=jpg-stage-20260623";
+        sessionStorage.setItem("inglesyaLane", "desktop");
+        localStorage.setItem("inglesyaLane", "desktop");
+        window.location.href = "ingles_desktop/structure.html?v=clean-sps-20260624";
       }
     }
   </script>

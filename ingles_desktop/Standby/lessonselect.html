@@ -133,120 +133,10 @@
       display: none;
     }
   }
-
-
-  .level-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 247, 223, 0.92);
-    padding: 20px;
-  }
-
-  .level-overlay.show {
-    display: flex;
-  }
-
-  .level-card {
-    width: min(90vw, 430px);
-    background: white;
-    border: 1px solid #d7c88a;
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.22);
-    text-align: center;
-    padding: 24px 18px;
-  }
-
-  .spinner {
-    width: 38px;
-    height: 38px;
-    border: 5px solid #ddd;
-    border-top-color: #007acc;
-    border-radius: 50%;
-    margin: 0 auto 14px;
-    animation: spin 0.85s linear infinite;
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  .level-message {
-    font-size: 18px;
-    font-weight: 700;
-    margin: 0;
-    color: #3b3020;
-  }
-
-  .level-credit {
-    font-size: 13px;
-    margin: 10px 0 0;
-    color: #665536;
-  }
-
-  .overlay-credits {
-    margin: 14px auto 0;
-    padding-top: 12px;
-    border-top: 1px solid #e4d8aa;
-    text-align: left;
-  }
-
-  .overlay-credits h2 {
-    margin: 0 0 8px;
-    text-align: center;
-    font-size: 1rem;
-    color: #3b3020;
-  }
-
-  .overlay-credits ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    font-size: 0.84rem;
-    line-height: 1.35;
-    color: #4d402b;
-  }
-
-  @media (max-width: 700px) {
-    .level-card {
-      padding: 20px 15px;
-    }
-
-    .overlay-credits ul {
-      font-size: 0.78rem;
-      line-height: 1.25;
-    }
-  }
-
 </style>
 </head>
 
 <body>
-
-<div id="levelOverlay" class="level-overlay" aria-live="polite" aria-label="Level selection message">
-  <div class="level-card">
-    <div class="spinner" aria-hidden="true"></div>
-    <p class="level-message">Your level is being selected...</p>
-    <p class="level-credit">Created by Jimmy Self</p>
-
-    <div class="overlay-credits" aria-label="Credits">
-      <h2>Créditos</h2>
-      <ul>
-        <li><strong>Creador del proyecto:</strong> Jimmy Self</li>
-        <li><strong>Ayudante:</strong> AJ Cornell</li>
-        <li><strong>Diseño y Arte:</strong> José García</li>
-        <li><strong>Visuales:</strong> María Flores</li>
-        <li><strong>Audio:</strong> Jimmy Self</li>
-        <li><strong>Asesor de producción:</strong> Prof. Eduardo De León</li>
-        <li><strong>Actores:</strong> A.J. Cornell, Rachel Cornell</li>
-      </ul>
-    </div>
-  </div>
-</div>
-
 <div class="lesson-page">
   <div class="title-card">
     <h1>InglesYa</h1>
@@ -284,26 +174,12 @@
 </div>
 
 <script>
-  function showLevelOverlay() {
-    const overlay = document.getElementById("levelOverlay");
-    if (overlay) overlay.classList.add("show");
-  }
-
   function goToLevel(levelNumber) {
-    showLevelOverlay();
-
-    const lesson = String(levelNumber);
+const lesson = String(levelNumber);
     sessionStorage.setItem("selectedLesson", lesson);
     sessionStorage.setItem("lesson", lesson);
     sessionStorage.setItem("currentLesson", lesson);
-
-    // This tells conductor.html not to show its own second loading overlay.
-    // The student has already seen the proper credits/spinner overlay here.
-    sessionStorage.setItem("skipConductorPrepOverlay", "yes");
-
-    window.setTimeout(function(){
-      window.location.href = "conductor.html";
-    }, 350);
+    window.location.href = "conductor.html";
   }
 </script>
 

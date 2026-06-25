@@ -175,11 +175,16 @@
 
 <script>
   function goToLevel(levelNumber) {
-const lesson = String(levelNumber);
+    const lesson = String(levelNumber);
     sessionStorage.setItem("selectedLesson", lesson);
     sessionStorage.setItem("lesson", lesson);
     sessionStorage.setItem("currentLesson", lesson);
-    window.location.href = "conductor.html";
+    sessionStorage.setItem("inglesyaLane", "phone");
+    localStorage.setItem("selectedLesson", lesson);
+    localStorage.setItem("lesson", lesson);
+    localStorage.setItem("currentLesson", lesson);
+    localStorage.setItem("inglesyaLane", "phone");
+    window.location.href = "conductor.html?lesson=" + encodeURIComponent(lesson) + "&prep=" + Date.now();
   }
 </script>
 

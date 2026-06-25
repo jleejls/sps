@@ -421,6 +421,105 @@
     background:#ff0000;
   }
 
+
+  /* Phone stage layout: 5 object pictures across the top,
+     9 person/pronoun pictures in the middle, 5 object pictures across the bottom. */
+  @media (max-width:700px){
+    html, body{
+      overflow-x:hidden;
+    }
+
+    main{
+      max-width:100vw;
+      padding:8px 6px calc(var(--trigger-bar-height) + 18px);
+    }
+
+    .lesson-number-badge{
+      top:5px;
+      right:6px;
+      width:30px;
+      height:30px;
+      font-size:14px;
+      z-index:80;
+    }
+
+    .director-grid{
+      display:grid;
+      grid-template-columns:1fr;
+      grid-template-rows:auto auto auto;
+      gap:5px;
+      width:100%;
+      margin:0 auto;
+    }
+
+    .object-col{
+      display:grid;
+      grid-template-columns:repeat(5, minmax(0, 1fr));
+      gap:3px;
+      width:100%;
+    }
+
+    .pronoun-grid{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0, 1fr));
+      gap:3px;
+      width:100%;
+    }
+
+    .tile{
+      width:100%;
+      max-height:none;
+      min-height:0;
+      aspect-ratio:1/1;
+      border-radius:7px;
+    }
+
+    #objLeft .tile,
+    #objRight .tile{
+      max-height:none;
+      aspect-ratio:1/1;
+    }
+
+    #objLeft .tile img,
+    #objRight .tile img{
+      width:100%;
+      height:100%;
+      max-width:92%;
+      max-height:92%;
+      object-fit:contain;
+      transform:none;
+    }
+
+    #pronouns .tile img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+    }
+
+    #pronouns .tile[data-index="8"] img,
+    #pronouns .tile[data-index="9"] img{
+      width:82%;
+      height:82%;
+    }
+
+    .zipbutton{
+      bottom:5px;
+      width:calc(100vw - 8px);
+      max-width:520px;
+      gap:3px;
+      padding:4px;
+      justify-content:space-between;
+    }
+
+    .buttonz{
+      width:11.5vw;
+      height:42px;
+      min-width:36px;
+      min-height:34px;
+      border-radius:8px;
+    }
+  }
+
 </style>
 <script>
 // ----- Conductor startup -----
@@ -517,26 +616,26 @@ for (let i = 0; i < sessionStorage.length; i++) {
 
 <div id="pbar" class="zipbutton" aria-label="Program buttons">
   <div class="buttonz" data-btn="continue" title="Advance to next page">
-  <img src="../trigger/adelante.png" alt="Advance">
-</div>
-<div class="buttonz" data-btn="exit" title="Exit"
-     onclick="window.location.assign('../quit.html');">
-  <img src="../trigger/exit.png">
-</div>
+    <img src="../trigger/adelante.png" alt="Advance">
+  </div>
+  <div class="buttonz" data-btn="exit" title="Exit" onclick="window.location.assign('../quit.html');">
+    <img src="../trigger/exit.png" alt="Exit">
+  </div>
   <div class="buttonz" data-btn="choosel" title="Choose lesson">
     <img src="../trigger/choosel.png" alt="Choose lesson">
   </div>
   <div class="buttonz" data-btn="help" title="Help / guidelines">
     <img src="../trigger/help.png" alt="Help">
   </div>
-  <div class="buttonz" data-btn="email" title="Contact Jimmy Lucky">
-    <img src="../trigger/email.png" alt="Email">
-  </div>
   <div class="buttonz" data-btn="donate" title="Donate">
     <img src="../trigger/donate.png" alt="Donate">
   </div>
-  <div class="buttonz" data-btn="goback" title="Go back">
-    <img src="../trigger/goback.png" alt="Back">
+    <div class="buttonz" data-btn="email" title="Contact Jimmy Lucky">
+    <img src="../trigger/email.png" alt="Email">
+  </div>
+  <!-- Button 7: La Gente - use the same clean desktop return pattern as Plática V2 -->
+  <div class="buttonz" data-btn="goback" title="La Gente">
+    <img src="../trigger/lagente.png" alt="La Gente">
   </div>
   <div class="buttonz" data-btn="translate" title="Translation">
     <img src="../trigger/translate.png" alt="Translate">
@@ -545,19 +644,10 @@ for (let i = 0; i < sessionStorage.length; i++) {
 
 <div id="contactOverlay" class="contact-overlay" hidden>
   <div class="contact-box">
-    <h2>Contact Jimmy Lucky</h2>
-    <p>To contact Jimmy Lucky, please leave this lesson page and open your own email program.</p>
-    <p>You may write in English or Spanish.</p>
-    <p>Send your message to:</p>
+    <h2>Email Contact</h2>
+    <p>Please send your message to:</p>
     <p class="contact-address">spanishsoundbites@gmail.com</p>
-
-    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=spanishsoundbites@gmail.com" target="_blank" rel="noopener">
-      Open Gmail
-    </a>
-
-       <button type="button" onclick="closeContactOverlay()">
-      Go Back
-    </button>
+    <button type="button" onclick="closeContactOverlay()">Close</button>
   </div>
 </div>
 <audio id="player" preload="auto"></audio>
@@ -597,17 +687,31 @@ for (let i = 0; i < sessionStorage.length; i++) {
   if (lessonBadge) lessonBadge.textContent = String(lesson);
 
   // ----- Paths -----
-  // This conductor supports both folder styles:
-  // 1) old split folders: pronouns/images, objects/images, pronouns/audios, objects/audios
-  // 2) newer single folders: image and sound
+  // Stage/JPG version:
+  // Prefer the new split JPG lesson images first. Keep PNG and old single-folder
+  // fallbacks so older backups can still run if they are opened by mistake.
+  // The small cache tag helps phones stop showing stale cached pictures.
+  const ASSET_VERSION = "jpg-stage-20260623";
+  const imgPath = path => `${path}?v=${ASSET_VERSION}`;
+
   const pronImg = i => [
-    `${basePath}/pronouns/images/p${i}.png`,
-    `${basePath}/image/p${i + 10}.png`,
-    `${basePath}/image/p${i}.png`
+    imgPath(`${basePath}/pronouns/images/p${i}.jpg`),
+    imgPath(`${basePath}/pronouns/images/p${i}.jpeg`),
+    imgPath(`${basePath}/pronouns/images/p${i}.png`),
+    imgPath(`${basePath}/image/p${i + 10}.jpg`),
+    imgPath(`${basePath}/image/p${i + 10}.jpeg`),
+    imgPath(`${basePath}/image/p${i + 10}.png`),
+    imgPath(`${basePath}/image/p${i}.jpg`),
+    imgPath(`${basePath}/image/p${i}.jpeg`),
+    imgPath(`${basePath}/image/p${i}.png`)
   ];
   const objImg  = i => [
-    `${basePath}/objects/images/p${i}.png`,
-    `${basePath}/image/p${i}.png`
+    imgPath(`${basePath}/objects/images/p${i}.jpg`),
+    imgPath(`${basePath}/objects/images/p${i}.jpeg`),
+    imgPath(`${basePath}/objects/images/p${i}.png`),
+    imgPath(`${basePath}/image/p${i}.jpg`),
+    imgPath(`${basePath}/image/p${i}.jpeg`),
+    imgPath(`${basePath}/image/p${i}.png`)
   ];
   const pronAud = i => [
     `${basePath}/pronouns/audios/a${i}.m4a`,
@@ -684,7 +788,7 @@ for (let i = 0; i < sessionStorage.length; i++) {
   const pronMount = document.getElementById("pronouns");
   const expressionTilesByIndex = {};
   pronounSlots.forEach(slot => {
-    const t = makeTile(pronImg(slot.id), `p${slot.id}.png`);
+    const t = makeTile(pronImg(slot.id), `p${slot.id}.jpg`);
     t.dataset.group = "pronouns";
     t.dataset.index = slot.id;
     t.dataset.kind  = slot.kind || "main"; // "main" or "expression"
@@ -699,7 +803,7 @@ for (let i = 0; i < sessionStorage.length; i++) {
   const rightCol = document.getElementById("objRight");
 
   objectSlots.forEach(slot => {
-    const t = makeTile(objImg(slot.id), `p${slot.id}.png`);
+    const t = makeTile(objImg(slot.id), `p${slot.id}.jpg`);
     t.dataset.group = "objects";
     t.dataset.index = slot.id;
 
@@ -1006,12 +1110,43 @@ function closeContactOverlay(){
       goTo("donate.html");
     },
 
+    // Button 7: La Gente - copied from the working Plática V2 desktop pattern.
+    // The conductor lives in the desktop folder, so La Gente is one level up.
     goback(){
-      if (history.length > 1) {
-        history.back();
-      } else {
-        goTo("index.html");
-      }
+      const lesson = currentLesson();
+      const returnHref = new URL(window.location.href);
+      returnHref.searchParams.set("lesson", String(lesson));
+      returnHref.searchParams.set("prep", Date.now());
+
+      sessionStorage.setItem("lagenteReturnHref", returnHref.href);
+      localStorage.setItem("lagenteReturnHref", returnHref.href);
+
+      localStorage.setItem("inglesyaLane", "desktop");
+      localStorage.setItem("platicaLane", "desktop");
+      localStorage.setItem("lesson", String(lesson));
+      localStorage.setItem("selectedLesson", String(lesson));
+      localStorage.setItem("currentLesson", String(lesson));
+
+      goTo("../lagente.html?return=desktop&lesson=" + encodeURIComponent(lesson) + "&returnHref=" + encodeURIComponent(returnHref.href));
+    },
+
+    // Keep this alias so older button labels still work if one slips through.
+    lagente(){
+      const lesson = currentLesson();
+      const returnHref = new URL(window.location.href);
+      returnHref.searchParams.set("lesson", String(lesson));
+      returnHref.searchParams.set("prep", Date.now());
+
+      sessionStorage.setItem("lagenteReturnHref", returnHref.href);
+      localStorage.setItem("lagenteReturnHref", returnHref.href);
+
+      localStorage.setItem("inglesyaLane", "desktop");
+      localStorage.setItem("platicaLane", "desktop");
+      localStorage.setItem("lesson", String(lesson));
+      localStorage.setItem("selectedLesson", String(lesson));
+      localStorage.setItem("currentLesson", String(lesson));
+
+      goTo("../lagente.html?return=desktop&lesson=" + encodeURIComponent(lesson) + "&returnHref=" + encodeURIComponent(returnHref.href));
     },
 
     translate(){
