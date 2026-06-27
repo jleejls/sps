@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -560,7 +560,7 @@ for (let i = 0; i < sessionStorage.length; i++) {
 
 <div id="imageMagnifierOverlay" class="image-magnifier-overlay" hidden aria-label="Magnified image viewer">
   <div class="image-magnifier-frame">
-    <button id="imageMagnifierClose" class="image-magnifier-close" type="button" aria-label="Close magnified image">×</button>
+    <button id="imageMagnifierClose" class="image-magnifier-close" type="button" aria-label="Close magnified image">Ã—</button>
     <img id="imageMagnifierImage" alt="Magnified image">
   </div>
 </div>
@@ -573,14 +573,14 @@ for (let i = 0; i < sessionStorage.length; i++) {
     <p class="prep-credit">Created by Jimmy Self</p>
 
     <div class="prep-credits" aria-label="Credits">
-      <h2>Créditos</h2>
+      <h2>CrÃ©ditos</h2>
       <ul>
         <li><strong>Creador del proyecto:</strong> Jimmy Self</li>
         <li><strong>Ayudante:</strong> AJ Cornell</li>
-        <li><strong>Diseño y Arte:</strong> José García</li>
-        <li><strong>Visuales:</strong> María Flores</li>
+        <li><strong>DiseÃ±o y Arte:</strong> JosÃ© GarcÃ­a</li>
+        <li><strong>Visuales:</strong> MarÃ­a Flores</li>
         <li><strong>Audio:</strong> Jimmy Self</li>
-        <li><strong>Asesor de producción:</strong> Prof. Eduardo De León</li>
+        <li><strong>Asesor de producciÃ³n:</strong> Prof. Eduardo De LeÃ³n</li>
         <li><strong>Actores:</strong> A.J. Cornell, Rachel Cornell</li>
       </ul>
     </div>
@@ -594,19 +594,19 @@ for (let i = 0; i < sessionStorage.length; i++) {
 
 <main>
   <div class="director-grid">
-    <!-- LEFT: objects 1–5 -->
+    <!-- LEFT: objects 1â€“5 -->
     <section class="director-column">
       <h3>Objects</h3>
       <div id="objLeft" class="object-col"></div>
     </section>
 
-    <!-- CENTER: pronouns 1–9 -->
+    <!-- CENTER: pronouns 1â€“9 -->
     <section class="director-column">
       <h3>Pronouns</h3>
       <div id="pronouns" class="pronoun-grid"></div>
     </section>
 
-    <!-- RIGHT: objects 6–10 -->
+    <!-- RIGHT: objects 6â€“10 -->
     <section class="director-column">
       <h3>&nbsp;</h3>
       <div id="objRight" class="object-col"></div>
@@ -616,29 +616,29 @@ for (let i = 0; i < sessionStorage.length; i++) {
 
 <div id="pbar" class="zipbutton" aria-label="Program buttons">
   <div class="buttonz" data-btn="continue" title="Advance to next page">
-    <img src="../trigger/adelante.png" alt="Advance">
+    <img src="../trigger/adelante.jpg" alt="Advance">
   </div>
   <div class="buttonz" data-btn="exit" title="Exit" onclick="window.location.assign('../quit.html');">
-    <img src="../trigger/exit.png" alt="Exit">
+    <img src="../trigger/exit.jpg" alt="Exit">
   </div>
   <div class="buttonz" data-btn="choosel" title="Choose lesson">
-    <img src="../trigger/choosel.png" alt="Choose lesson">
+    <img src="../trigger/choosel.jpg" alt="Choose lesson">
   </div>
   <div class="buttonz" data-btn="help" title="Help / guidelines">
-    <img src="../trigger/help.png" alt="Help">
+    <img src="../trigger/help.jpg" alt="Help">
   </div>
   <div class="buttonz" data-btn="donate" title="Donate">
-    <img src="../trigger/donate.png" alt="Donate">
+    <img src="../trigger/donate.jpg" alt="Donate">
   </div>
     <div class="buttonz" data-btn="email" title="Contact Jimmy Lucky">
-    <img src="../trigger/email.png" alt="Email">
+    <img src="../trigger/email.jpg" alt="Email">
   </div>
-  <!-- Button 7: La Gente - use the same clean desktop return pattern as Plática V2 -->
+  <!-- Button 7: La Gente - use the same clean desktop return pattern as PlÃ¡tica V2 -->
   <div class="buttonz" data-btn="goback" title="La Gente">
-    <img src="../trigger/lagente.png" alt="La Gente">
+    <img src="../trigger/lagente.jpg" alt="La Gente">
   </div>
   <div class="buttonz" data-btn="translate" title="Translation">
-    <img src="../trigger/translate.png" alt="Translate">
+    <img src="../trigger/translate.jpg" alt="Translate">
   </div>
 </div>
 
@@ -697,21 +697,21 @@ for (let i = 0; i < sessionStorage.length; i++) {
   const pronImg = i => [
     imgPath(`${basePath}/pronouns/images/p${i}.jpg`),
     imgPath(`${basePath}/pronouns/images/p${i}.jpeg`),
-    imgPath(`${basePath}/pronouns/images/p${i}.png`),
+    imgPath(`${basePath}/pronouns/images/p${i}.jpg`),
     imgPath(`${basePath}/image/p${i + 10}.jpg`),
     imgPath(`${basePath}/image/p${i + 10}.jpeg`),
-    imgPath(`${basePath}/image/p${i + 10}.png`),
+    imgPath(`${basePath}/image/p${i + 10}.jpg`),
     imgPath(`${basePath}/image/p${i}.jpg`),
     imgPath(`${basePath}/image/p${i}.jpeg`),
-    imgPath(`${basePath}/image/p${i}.png`)
+    imgPath(`${basePath}/image/p${i}.jpg`)
   ];
   const objImg  = i => [
     imgPath(`${basePath}/objects/images/p${i}.jpg`),
     imgPath(`${basePath}/objects/images/p${i}.jpeg`),
-    imgPath(`${basePath}/objects/images/p${i}.png`),
+    imgPath(`${basePath}/objects/images/p${i}.jpg`),
     imgPath(`${basePath}/image/p${i}.jpg`),
     imgPath(`${basePath}/image/p${i}.jpeg`),
-    imgPath(`${basePath}/image/p${i}.png`)
+    imgPath(`${basePath}/image/p${i}.jpg`)
   ];
   const pronAud = i => [
     `${basePath}/pronouns/audios/a${i}.m4a`,
@@ -784,7 +784,7 @@ for (let i = 0; i < sessionStorage.length; i++) {
     return d;
   }
 
-  // ----- Build pronoun tiles (3×3 grid, ids 1..9) -----
+  // ----- Build pronoun tiles (3Ã—3 grid, ids 1..9) -----
   const pronMount = document.getElementById("pronouns");
   const expressionTilesByIndex = {};
   pronounSlots.forEach(slot => {
@@ -1110,7 +1110,7 @@ function closeContactOverlay(){
       goTo("donate.html");
     },
 
-    // Button 7: La Gente - copied from the working Plática V2 desktop pattern.
+    // Button 7: La Gente - copied from the working PlÃ¡tica V2 desktop pattern.
     // The conductor lives in the desktop folder, so La Gente is one level up.
     goback(){
       const lesson = currentLesson();

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -99,7 +99,7 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-  transform: scale(1.35);
+  transform: scale(1.15);
 }
 
 .tile{
@@ -131,7 +131,7 @@
     max-width:none;
     max-height:none;
     object-fit:contain;
-    transform:scale(1.45);
+    transform:scale(1.15);
 }
 
 /* your existing img rules can stay as they are */
@@ -364,12 +364,170 @@
     }
   }
 
+
+  /* Right-click image magnifier */
+  .image-magnifier-overlay{
+    position:fixed;
+    inset:0;
+    z-index:10000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,0.72);
+    padding:36px;
+  }
+
+  .image-magnifier-overlay[hidden]{
+    display:none;
+  }
+
+  .image-magnifier-frame{
+    position:relative;
+    max-width:96vw;
+    max-height:96vh;
+    overflow:auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+
+  .image-magnifier-frame img{
+    display:block;
+    max-width:88vw;
+    max-height:88vh;
+    object-fit:contain;
+    transform:scale(1.15);
+    transform-origin:center center;
+  }
+
+  .image-magnifier-close{
+    position:absolute;
+    top:8px;
+    right:8px;
+    z-index:10001;
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    border:3px solid #ffffff;
+    background:#d00000;
+    color:#ffffff;
+    font:bold 26px/1 Arial, Helvetica, sans-serif;
+    cursor:pointer;
+    box-shadow:0 2px 10px rgba(0,0,0,0.35);
+  }
+
+  .image-magnifier-close:hover{
+    background:#ff0000;
+  }
+
+
+  /* Phone stage layout: 5 object pictures across the top,
+     9 person/pronoun pictures in the middle, 5 object pictures across the bottom. */
+  @media (max-width:700px){
+    html, body{
+      overflow-x:hidden;
+    }
+
+    main{
+      max-width:100vw;
+      padding:8px 6px calc(var(--trigger-bar-height) + 18px);
+    }
+
+    .lesson-number-badge{
+      top:5px;
+      right:6px;
+      width:30px;
+      height:30px;
+      font-size:14px;
+      z-index:80;
+    }
+
+    .director-grid{
+      display:grid;
+      grid-template-columns:1fr;
+      grid-template-rows:auto auto auto;
+      gap:5px;
+      width:100%;
+      margin:0 auto;
+    }
+
+    .object-col{
+      display:grid;
+      grid-template-columns:repeat(5, minmax(0, 1fr));
+      gap:3px;
+      width:100%;
+    }
+
+    .pronoun-grid{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0, 1fr));
+      gap:3px;
+      width:100%;
+    }
+
+    .tile{
+      width:100%;
+      max-height:none;
+      min-height:0;
+      aspect-ratio:1/1;
+      border-radius:7px;
+    }
+
+    #objLeft .tile,
+    #objRight .tile{
+      max-height:none;
+      aspect-ratio:1/1;
+    }
+
+    #objLeft .tile img,
+    #objRight .tile img{
+      width:100%;
+      height:100%;
+      max-width:92%;
+      max-height:92%;
+      object-fit:contain;
+      transform:none;
+    }
+
+    #pronouns .tile img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+    }
+
+    #pronouns .tile[data-index="8"] img,
+    #pronouns .tile[data-index="9"] img{
+      width:82%;
+      height:82%;
+    }
+
+    .zipbutton{
+      bottom:5px;
+      width:calc(100vw - 8px);
+      max-width:520px;
+      gap:3px;
+      padding:4px;
+      justify-content:space-between;
+    }
+
+    .buttonz{
+      width:11.5vw;
+      height:42px;
+      min-width:36px;
+      min-height:34px;
+      border-radius:8px;
+    }
+  }
+
 </style>
 <script>
 // ----- Conductor startup -----
 // Accept the lesson number no matter which earlier page stored it.
 (function () {
+  const urlLesson = new URLSearchParams(window.location.search).get("lesson");
   const storedLesson =
+    urlLesson ||
     sessionStorage.getItem("selectedLesson") ||
     sessionStorage.getItem("lesson") ||
     sessionStorage.getItem("currentLesson") ||
@@ -399,6 +557,15 @@ for (let i = 0; i < sessionStorage.length; i++) {
 </head>
 <body>
 
+
+<div id="imageMagnifierOverlay" class="image-magnifier-overlay" hidden aria-label="Magnified image viewer">
+  <div class="image-magnifier-frame">
+    <button id="imageMagnifierClose" class="image-magnifier-close" type="button" aria-label="Close magnified image">×</button>
+    <img id="imageMagnifierImage" alt="Magnified image">
+  </div>
+</div>
+
+
 <div id="prepOverlay" class="prep-overlay" aria-live="polite" aria-label="Lesson preparation message">
   <div class="prep-card">
     <div class="prep-spinner" aria-hidden="true"></div>
@@ -406,14 +573,14 @@ for (let i = 0; i < sessionStorage.length; i++) {
     <p class="prep-credit">Created by Jimmy Self</p>
 
     <div class="prep-credits" aria-label="Credits">
-      <h2>CrÃ©ditos</h2>
+      <h2>Créditos</h2>
       <ul>
         <li><strong>Creador del proyecto:</strong> Jimmy Self</li>
         <li><strong>Ayudante:</strong> AJ Cornell</li>
-        <li><strong>DiseÃ±o y Arte:</strong> JosÃ© GarcÃ­a</li>
-        <li><strong>Visuales:</strong> MarÃ­a Flores</li>
+        <li><strong>Diseño y Arte:</strong> José García</li>
+        <li><strong>Visuales:</strong> María Flores</li>
         <li><strong>Audio:</strong> Jimmy Self</li>
-        <li><strong>Asesor de producciÃ³n:</strong> Prof. Eduardo De LeÃ³n</li>
+        <li><strong>Asesor de producción:</strong> Prof. Eduardo De León</li>
         <li><strong>Actores:</strong> A.J. Cornell, Rachel Cornell</li>
       </ul>
     </div>
@@ -427,19 +594,19 @@ for (let i = 0; i < sessionStorage.length; i++) {
 
 <main>
   <div class="director-grid">
-    <!-- LEFT: objects 1â€“5 -->
+    <!-- LEFT: objects 1–5 -->
     <section class="director-column">
       <h3>Objects</h3>
       <div id="objLeft" class="object-col"></div>
     </section>
 
-    <!-- CENTER: pronouns 1â€“9 -->
+    <!-- CENTER: pronouns 1–9 -->
     <section class="director-column">
       <h3>Pronouns</h3>
       <div id="pronouns" class="pronoun-grid"></div>
     </section>
 
-    <!-- RIGHT: objects 6â€“10 -->
+    <!-- RIGHT: objects 6–10 -->
     <section class="director-column">
       <h3>&nbsp;</h3>
       <div id="objRight" class="object-col"></div>
@@ -449,26 +616,26 @@ for (let i = 0; i < sessionStorage.length; i++) {
 
 <div id="pbar" class="zipbutton" aria-label="Program buttons">
   <div class="buttonz" data-btn="continue" title="Advance to next page">
-  <img src="../trigger/adelante.jpg" alt="Advance">
-</div>
-<div class="buttonz" data-btn="exit" title="Exit"
-     onclick="window.location.assign('../quit.html');">
-  <img src="../trigger/exit.jpg">
-</div>
+    <img src="../trigger/adelante.jpg" alt="Advance">
+  </div>
+  <div class="buttonz" data-btn="exit" title="Exit" onclick="window.location.assign('../quit.html');">
+    <img src="../trigger/exit.jpg" alt="Exit">
+  </div>
   <div class="buttonz" data-btn="choosel" title="Choose lesson">
     <img src="../trigger/choosel.jpg" alt="Choose lesson">
   </div>
   <div class="buttonz" data-btn="help" title="Help / guidelines">
     <img src="../trigger/help.jpg" alt="Help">
   </div>
-  <div class="buttonz" data-btn="email" title="Contact Jimmy Lucky">
-    <img src="../trigger/email.jpg" alt="Email">
-  </div>
   <div class="buttonz" data-btn="donate" title="Donate">
     <img src="../trigger/donate.jpg" alt="Donate">
   </div>
-  <div class="buttonz" data-btn="goback" title="Go back">
-    <img src="../trigger/goback.jpg" alt="Back">
+    <div class="buttonz" data-btn="email" title="Contact Jimmy Lucky">
+    <img src="../trigger/email.jpg" alt="Email">
+  </div>
+  <!-- Button 7: La Gente - use the same clean desktop return pattern as Plática V2 -->
+  <div class="buttonz" data-btn="goback" title="La Gente">
+    <img src="../trigger/lagente.jpg" alt="La Gente">
   </div>
   <div class="buttonz" data-btn="translate" title="Translation">
     <img src="../trigger/translate.jpg" alt="Translate">
@@ -477,19 +644,10 @@ for (let i = 0; i < sessionStorage.length; i++) {
 
 <div id="contactOverlay" class="contact-overlay" hidden>
   <div class="contact-box">
-    <h2>Contact Jimmy Lucky</h2>
-    <p>To contact Jimmy Lucky, please leave this lesson page and open your own email program.</p>
-    <p>You may write in English or Spanish.</p>
-    <p>Send your message to:</p>
+    <h2>Email Contact</h2>
+    <p>Please send your message to:</p>
     <p class="contact-address">spanishsoundbites@gmail.com</p>
-
-    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=spanishsoundbites@gmail.com" target="_blank" rel="noopener">
-      Open Gmail
-    </a>
-
-       <button type="button" onclick="closeContactOverlay()">
-      Go Back
-    </button>
+    <button type="button" onclick="closeContactOverlay()">Close</button>
   </div>
 </div>
 <audio id="player" preload="auto"></audio>
@@ -529,18 +687,12 @@ for (let i = 0; i < sessionStorage.length; i++) {
   if (lessonBadge) lessonBadge.textContent = String(lesson);
 
   // ----- Paths -----
-  // This conductor supports both folder styles:
-  // 1) old split folders: pronouns/images, objects/images, pronouns/audios, objects/audios
-  // 2) newer single folders: image and sound
-  const pronImg = i => [
-    `${basePath}/pronouns/images/p${i}.jpg`,
-    `${basePath}/image/p${i + 10}.jpg`,
-    `${basePath}/image/p${i}.jpg`
-  ];
-  const objImg  = i => [
-    `${basePath}/objects/images/p${i}.jpg`,
-    `${basePath}/image/p${i}.jpg`
-  ];
+  // Strict modular JPG version. No PNG fallback and no old image-folder fallback.
+  const ASSET_VERSION = "clean-sps-strict-jpg-20260624";
+  const imgPath = path => `${path}?v=${ASSET_VERSION}`;
+
+  const pronImg = i => imgPath(`${basePath}/pronouns/images/p${i}.jpg`);
+  const objImg  = i => imgPath(`${basePath}/objects/images/p${i}.jpg`);
   const pronAud = i => [
     `${basePath}/pronouns/audios/a${i}.m4a`,
     `${basePath}/sound/${i + 10}.m4a`,
@@ -612,7 +764,7 @@ for (let i = 0; i < sessionStorage.length; i++) {
     return d;
   }
 
-  // ----- Build pronoun tiles (3Ã—3 grid, ids 1..9) -----
+  // ----- Build pronoun tiles (3×3 grid, ids 1..9) -----
   const pronMount = document.getElementById("pronouns");
   const expressionTilesByIndex = {};
   pronounSlots.forEach(slot => {
@@ -913,8 +1065,9 @@ function closeContactOverlay(){
 
       sessionStorage.setItem("lesson", String(nextLesson));
       sessionStorage.setItem("selectedLesson", String(nextLesson));
+      sessionStorage.setItem("currentLesson", String(nextLesson));
 
-      window.location.href = "conductor.html";
+      window.location.href = "conductor.html?lesson=" + nextLesson + "&prep=" + Date.now();
     },
 
     exit(){
@@ -937,12 +1090,26 @@ function closeContactOverlay(){
       goTo("donate.html");
     },
 
+    // Button 7: La Gente - clean lane return, no file URL storage and no Plática fallback.
+    openLaGente(){
+      const lesson = currentLesson();
+      sessionStorage.setItem("inglesyaLane", "desktop");
+      localStorage.setItem("inglesyaLane", "desktop");
+      sessionStorage.setItem("lesson", String(lesson));
+      sessionStorage.setItem("selectedLesson", String(lesson));
+      sessionStorage.setItem("currentLesson", String(lesson));
+      localStorage.setItem("lesson", String(lesson));
+      localStorage.setItem("selectedLesson", String(lesson));
+      localStorage.setItem("currentLesson", String(lesson));
+      goTo("../lagente.html?return=desktop&lesson=" + encodeURIComponent(lesson));
+    },
+
     goback(){
-      if (history.length > 1) {
-        history.back();
-      } else {
-        goTo("index.html");
-      }
+      actions.openLaGente();
+    },
+
+    lagente(){
+      actions.openLaGente();
     },
 
     translate(){
@@ -982,27 +1149,93 @@ console.log("Tense:", tense);
 <script>
 // ----- Conductor preparation pause -----
 // The lesson select page only chooses the lesson. The visible pause/credits overlay
-// now belongs here, where the lesson itself is being prepared.
+// belongs here in conductor.html, where the lesson itself is being prepared.
 (function(){
-  const minimumPauseMs = 2000;
-  const startedAt = Date.now();
+  const MINIMUM_PREP_DELAY_MS = 2000;
+  let prepTimer = null;
 
-  function closePrepOverlay(){
-    const overlay = document.getElementById("prepOverlay");
-    if (overlay) overlay.classList.add("done");
+  function overlay(){
+    return document.getElementById("prepOverlay");
   }
 
-  function finishAfterMinimumPause(){
-    const elapsed = Date.now() - startedAt;
-    const remaining = Math.max(0, minimumPauseMs - elapsed);
-    window.setTimeout(closePrepOverlay, remaining);
+  function showPrepOverlay(){
+    const box = overlay();
+    if (box) box.classList.remove("done");
+  }
+
+  function closePrepOverlay(){
+    const box = overlay();
+    if (box) box.classList.add("done");
+  }
+
+  function runPrepPause(){
+    showPrepOverlay();
+    window.clearTimeout(prepTimer);
+    prepTimer = window.setTimeout(closePrepOverlay, MINIMUM_PREP_DELAY_MS);
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", finishAfterMinimumPause, { once:true });
+    document.addEventListener("DOMContentLoaded", runPrepPause, { once:true });
   } else {
-    finishAfterMinimumPause();
+    runPrepPause();
   }
+
+  // If the browser restores this page from its back/forward memory,
+  // make the overlay behavior reliable again instead of leaving an old hidden state.
+  window.addEventListener("pageshow", function(ev){
+    if (ev.persisted) runPrepPause();
+  });
+})();
+</script>
+
+
+<script>
+// ----- Right-click magnifier -----
+// Right-click any lesson picture to enlarge it.
+// The red X in the upper-right closes the enlarged view.
+(function(){
+  const overlay = document.getElementById("imageMagnifierOverlay");
+  const magnifiedImage = document.getElementById("imageMagnifierImage");
+  const closeButton = document.getElementById("imageMagnifierClose");
+
+  if (!overlay || !magnifiedImage || !closeButton) return;
+
+  function openMagnifier(sourceImage){
+    const src = sourceImage.currentSrc || sourceImage.src;
+    if (!src) return;
+
+    magnifiedImage.src = src;
+    magnifiedImage.alt = sourceImage.alt || "Magnified image";
+    overlay.hidden = false;
+  }
+
+  function closeMagnifier(){
+    overlay.hidden = true;
+    magnifiedImage.removeAttribute("src");
+  }
+
+  document.addEventListener("contextmenu", function(ev){
+    const sourceImage = ev.target.closest(".tile img");
+    if (!sourceImage) return;
+
+    ev.preventDefault();
+    ev.stopPropagation();
+    openMagnifier(sourceImage);
+  });
+
+  closeButton.addEventListener("click", function(ev){
+    ev.preventDefault();
+    ev.stopPropagation();
+    closeMagnifier();
+  });
+
+  // Only the red X button closes the magnified image.
+  // Clicking outside the image no longer closes it.
+  document.addEventListener("keydown", function(ev){
+    if (ev.key === "Escape" && !overlay.hidden) {
+      closeMagnifier();
+    }
+  });
 })();
 </script>
 
