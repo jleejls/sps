@@ -11,58 +11,63 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #f3e2cc;
+      background: #f4e2cf;
       font-family: Arial, sans-serif;
-      color: #2b2b2b;
       text-align: center;
+      color: #333;
     }
+
     .box {
-      width: min(90vw, 520px);
-      padding: 32px;
-      border: 2px solid #8a6a46;
-      border-radius: 18px;
-      background: #fff8ef;
-      box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+      max-width: 420px;
+      padding: 28px;
+      border: 2px solid #8b5a2b;
+      border-radius: 16px;
+      background: white;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
     }
+
     h1 {
       margin-top: 0;
-      font-size: 28px;
+      font-size: 1.6rem;
     }
+
     p {
-      font-size: 18px;
-      line-height: 1.45;
+      font-size: 1.05rem;
+      line-height: 1.5;
     }
+
     button {
-      margin-top: 22px;
-      padding: 14px 28px;
-      font-size: 18px;
+      margin-top: 20px;
+      padding: 12px 24px;
+      font-size: 1rem;
       border: none;
-      border-radius: 12px;
-      background: #6f4e2f;
+      border-radius: 10px;
+      background: #8b5a2b;
       color: white;
       cursor: pointer;
     }
-    button:active {
-      transform: scale(0.98);
+
+    button:hover {
+      background: #6f451f;
     }
   </style>
 </head>
 <body>
-  <main class="box">
+  <div class="box">
     <h1>Stage Web Page</h1>
     <p>
-      This is a stage web page used for testing.
+      This is a stage web page used for testing.<br>
       It is not available for public use.
     </p>
     <button onclick="closePage()">Close</button>
-  </main>
+  </div>
+
   <script>
     function closePage() {
-      window.open('', '_self');
       window.close();
+
       setTimeout(function () {
-        document.body.innerHTML =
-          '<main class="box"><h1>Closed</h1><p>You may now close this browser tab.</p></main>';
+        window.location.href = "about:blank";
       }, 300);
     }
   </script>
